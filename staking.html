@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Cryptocurrency Staking</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #999999;
+    --accent-cyan: #00d9ff;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --border-color: #2a2a2a;
+    --sidebar-width: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Permanent Side Tab (Always Visible) */
+.side-tab {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-tab-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hamburger-btn {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.hamburger-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.side-tab-icons {
+    flex: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tab-icon {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    font-size: 1.2rem;
+}
+
+.tab-icon:hover,
+.tab-icon.active {
+    color: var(--accent-cyan);
+    background-color: rgba(0, 217, 255, 0.05);
+    border-left-color: var(--accent-cyan);
+}
+
+/* Sliding Sidebar (Opens on hamburger click) */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.user-details h6 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.close-sidebar:hover {
+    color: var(--text-primary);
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background-color: var(--bg-card);
+    color: var(--accent-cyan);
+    border-left-color: var(--accent-cyan);
+}
+
+.menu-item i {
+    width: 20px;
+    font-size: 18px;
+}
+
+.menu-divider {
+    padding: 10px 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Main Content */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.top-header {
+    height: 70px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #bb2d3b;
+}
+
+/* Dashboard Content */
+.content-container {
+    padding: 30px;
+}
+
+.custom-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    height: 100%;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+/* Balance Cards */
+.balance-card {
+    background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(0, 217, 255, 0.02));
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+}
+
+.balance-card.staked {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.02));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.balance-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: rgba(0, 217, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.balance-card.staked .balance-icon {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.balance-info {
+    flex: 1;
+}
+
+.balance-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.balance-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+.balance-card.staked .balance-amount {
+    color: var(--accent-purple);
+}
+
+/* Coin Grid */
+.coin-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.coin-card:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+}
+
+.coin-card.selected {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.05);
+}
+
+.coin-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--accent-cyan);
+}
+
+.coin-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.coin-symbol {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.coin-apy {
+    color: #4ade80;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Duration Cards */
+.duration-card {
+    background-color: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.duration-card:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-3px);
+}
+
+.duration-card.selected {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.05);
+}
+
+.duration-badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: #f59e0b;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.duration-badge.best {
+    background: #4ade80;
+}
+
+.duration-days {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.duration-rewards {
+    color: #4ade80;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Amount Input */
+.amount-input-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.amount-input {
+    width: 100%;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px 15px 15px 40px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.amount-input:focus {
+    border-color: var(--accent-cyan);
+}
+
+.dollar-sign {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* Quick Amount Buttons */
+.quick-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.quick-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.quick-btn:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 217, 255, 0.1);
+}
+
+/* Estimated Returns */
+.returns-card {
+    background: linear-gradient(135deg, rgba(0, 100, 80, 0.2), rgba(0, 100, 80, 0.05));
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+}
+
+.returns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.returns-item {
+    text-align: center;
+}
+
+.returns-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.returns-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.returns-value.highlight {
+    color: var(--accent-cyan);
+}
+
+/* Start Staking Button */
+.btn-stake {
+    width: 100%;
+    background: var(--accent-cyan);
+    color: #000;
+    border: none;
+    padding: 18px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-stake:hover {
+    background: #00b8d4;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+}
+
+.btn-stake:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Active Stakings */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-text {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.empty-subtext {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.section-icon {
+    color: var(--accent-cyan);
+}
+
+/* Chat Button */
+.chat-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.chat-button:hover {
+    transform: scale(1.1);
+}
+
+.chat-button i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 12px;
+    height: 12px;
+    background: #4ade80;
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+}
+
+/* Dropdown */
+.custom-select {
+    width: 100%;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+.text-cyan {
+    color: var(--accent-cyan);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .content-container {
+        padding: 20px 15px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .returns-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .top-header {
+        padding: 0 15px;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Permanent Side Tab -->
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+            <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon" title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html" class="tab-icon active" title="Staking">
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sliding Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="staking.html" class="menu-item active">
+                <i class="fas fa-coins"></i>
+                <span>Staking</span>
+            </a>
+            <a href="plan.html" class="menu-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Plan</span>
+            </a>
+            <a href="live-trading.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Live Trading</span>
+            </a>
+            <a href="deposit.html" class="menu-item">
+                <i class="fas fa-wallet"></i>
+                <span>Deposit</span>
+            </a>
+
+            <div class="menu-divider">MORE</div>
+
+            <a href="copy-trading.html" class="menu-item">
+                <i class="fas fa-copy"></i>
+                <span>Copy Traders</span>
+            </a>
+            <a href="transaction.html" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="withdraw.html" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdraw Funds</span>
+            </a>
+            <a href="kyc.html" class="menu-item">
+                <i class="fas fa-user-check"></i>
+                <span>KYC</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title"><img src="assets/img/logo.png" alt="StakeClone"></div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-container">
+            <h1 class="page-title">Cryptocurrency Staking</h1>
+
+            <!-- Balance Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="balance-card">
+                        <div class="balance-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="balance-info">
+                            <div class="balance-label">Available Balance</div>
+                            <div class="balance-amount">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="balance-card staked">
+                        <div class="balance-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="balance-info">
+                            <div class="balance-label">Staked Balance</div>
+                            <div class="balance-amount">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left Column - Staking Form -->
+                <div class="col-lg-8">
+                    <div class="custom-card">
+                        <div class="section-header">
+                            <i class="fas fa-plus-circle section-icon"></i>
+                            <h4 class="mb-0 fw-bold">Start Staking</h4>
+                        </div>
+                        <p class="text-secondary mb-4">Choose your cryptocurrency and earn passive rewards</p>
+
+                        <!-- Select Cryptocurrency -->
+                        <div class="mb-4">
+                            <div class="section-header">
+                                <i class="fas fa-coins section-icon"></i>
+                                <h5 class="mb-0">Select Cryptocurrency</h5>
+                            </div>
+
+                            <h6 class="text-cyan mt-3 mb-3">
+                                <i class="fas fa-star"></i> Popular Coins
+                            </h6>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Ethereum', 'ETH', 950)">
+                                        <div class="coin-icon">💎</div>
+                                        <div class="coin-name">Ethereum</div>
+                                        <div class="coin-symbol">ETH</div>
+                                        <div class="coin-apy">950% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Cardano', 'ADA', 980)">
+                                        <div class="coin-icon">🔷</div>
+                                        <div class="coin-name">Cardano</div>
+                                        <div class="coin-symbol">ADA</div>
+                                        <div class="coin-apy">980% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Polkadot', 'DOT', 1100)">
+                                        <div class="coin-icon">⚫</div>
+                                        <div class="coin-name">Polkadot</div>
+                                        <div class="coin-symbol">DOT</div>
+                                        <div class="coin-apy">1100% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Solana', 'SOL', 990)">
+                                        <div class="coin-icon">🟣</div>
+                                        <div class="coin-name">Solana</div>
+                                        <div class="coin-symbol">SOL</div>
+                                        <div class="coin-apy">990% APY</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Avalanche', 'AVAX', 1200)">
+                                        <div class="coin-icon">🔺</div>
+                                        <div class="coin-name">Avalanche</div>
+                                        <div class="coin-symbol">AVAX</div>
+                                        <div class="coin-apy">1200% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Polygon', 'MATIC', 925)">
+                                        <div class="coin-icon">🔶</div>
+                                        <div class="coin-name">Polygon</div>
+                                        <div class="coin-symbol">MATIC</div>
+                                        <div class="coin-apy">925% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Cosmos', 'ATOM', 1300)">
+                                        <div class="coin-icon">⚛️</div>
+                                        <div class="coin-name">Cosmos</div>
+                                        <div class="coin-symbol">ATOM</div>
+                                        <div class="coin-apy">1300% APY</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="coin-card" onclick="selectCoin(this, 'Algorand', 'ALGO', 970)">
+                                        <div class="coin-icon">🔼</div>
+                                        <div class="coin-name">Algorand</div>
+                                        <div class="coin-symbol">ALGO</div>
+                                        <div class="coin-apy">970% APY</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- More Coins Dropdown -->
+                            <div class="mb-4">
+                                <h6 class="text-secondary mb-2">
+                                    <i class="fas fa-list"></i> More Coins
+                                </h6>
+                                <p class="text-secondary small mb-2">Looking for a specific coin? Select from our extended list</p>
+                                <select class="custom-select" id="moreCoinsSelect" onchange="selectMoreCoin(this)">
+                                    <option value="">Select from 30+ more coins...</option>
+                                    <option value="BNB:800">Binance Coin (BNB) - 800% APY</option>
+                                    <option value="XRP:750">Ripple (XRP) - 750% APY</option>
+                                    <option value="LINK:850">Chainlink (LINK) - 850% APY</option>
+                                    <option value="UNI:900">Uniswap (UNI) - 900% APY</option>
+                                    <option value="AAVE:920">Aave (AAVE) - 920% APY</option>
+                                    <option value="NEAR:880">Near Protocol (NEAR) - 880% APY</option>
+                                    <option value="FTM:1050">Fantom (FTM) - 1050% APY</option>
+                                    <option value="SAND:950">The Sandbox (SAND) - 950% APY</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Staking Duration -->
+                        <div class="mb-4">
+                            <div class="section-header">
+                                <i class="fas fa-calendar-alt section-icon"></i>
+                                <h5 class="mb-0">Staking Duration</h5>
+                            </div>
+
+                            <div class="row g-3 mt-2">
+                                <div class="col-6 col-md-3">
+                                    <div class="duration-card" onclick="selectDuration(this, 30, 1)">
+                                        <div class="duration-days">30 Days</div>
+                                        <div class="duration-rewards">1x Rewards</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="duration-card" onclick="selectDuration(this, 90, 1.2)">
+                                        <span class="duration-badge">POPULAR</span>
+                                        <div class="duration-days">90 Days</div>
+                                        <div class="duration-rewards">1.2x Rewards</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="duration-card" onclick="selectDuration(this, 180, 1.5)">
+                                        <div class="duration-days">180 Days</div>
+                                        <div class="duration-rewards">1.5x Rewards</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="duration-card" onclick="selectDuration(this, 365, 2)">
+                                        <span class="duration-badge best">BEST</span>
+                                        <div class="duration-days">365 Days</div>
+                                        <div class="duration-rewards">2x Rewards</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Staking Amount -->
+                        <div class="mb-4">
+                            <div class="section-header">
+                                <i class="fas fa-dollar-sign section-icon"></i>
+                                <h5 class="mb-0">Staking Amount</h5>
+                            </div>
+
+                            <div class="amount-input-wrapper mt-3">
+                                <span class="dollar-sign">$</span>
+                                <input type="number" class="amount-input" id="stakingAmount" placeholder="Enter amount to stake" oninput="calculateReturns()">
+                            </div>
+
+                            <div class="quick-amounts">
+                                <button class="quick-btn" onclick="setQuickAmount(25)">25%</button>
+                                <button class="quick-btn" onclick="setQuickAmount(50)">50%</button>
+                                <button class="quick-btn" onclick="setQuickAmount(75)">75%</button>
+                                <button class="quick-btn" onclick="setQuickAmount(100)">MAX</button>
+                            </div>
+
+                            <p class="text-secondary small">Available: $<span id="availableBalance">0.00</span></p>
+                        </div>
+
+                        <!-- Estimated Returns -->
+                        <div class="returns-card">
+                            <div class="section-header">
+                                <i class="fas fa-chart-line section-icon"></i>
+                                <h5 class="mb-0">Estimated Returns</h5>
+                            </div>
+
+                            <div class="returns-grid">
+                                <div class="returns-item">
+                                    <div class="returns-label">Staking Amount</div>
+                                    <div class="returns-value">$<span id="displayAmount">0.00</span></div>
+                                </div>
+                                <div class="returns-item">
+                                    <div class="returns-label">Estimated APY</div>
+                                    <div class="returns-value"><span id="displayAPY">0</span>%</div>
+                                </div>
+                                <div class="returns-item">
+                                    <div class="returns-label">Duration</div>
+                                    <div class="returns-value"><span id="displayDuration">0</span> days</div>
+                                </div>
+                                <div class="returns-item">
+                                    <div class="returns-label">Total Returns</div>
+                                    <div class="returns-value highlight">$<span id="displayReturns">0.00</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Start Staking Button -->
+                        <button class="btn-stake" id="stakeBtn" onclick="startStaking()">
+                            <i class="fas fa-rocket"></i>
+                            START STAKING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column - Active Stakings -->
+                <div class="col-lg-4">
+                    <div class="custom-card">
+                        <div class="section-header">
+                            <i class="fas fa-history section-icon"></i>
+                            <h5 class="mb-0">Your Active Stakings</h5>
+                        </div>
+
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="empty-text">No active stakings yet</div>
+                            <div class="empty-subtext">Start your first staking to earn passive rewards</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Sidebar Function
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+}
+
+// Close Sidebar Function
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Close sidebar on menu item click (mobile)
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+});
+
+// Staking Logic Variables
+let selectedCoin = null;
+let selectedAPY = 0;
+let selectedDuration = 0;
+let durationMultiplier = 1;
+
+// Select Coin Function
+function selectCoin(element, name, symbol, apy) {
+    // Remove previous selection
+    document.querySelectorAll('.coin-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked card
+    element.classList.add('selected');
+    
+    // Store selection
+    selectedCoin = { name, symbol, apy };
+    selectedAPY = apy;
+    
+    // Reset more coins dropdown
+    document.getElementById('moreCoinsSelect').value = '';
+    
+    // Calculate returns
+    calculateReturns();
+}
+
+// Select More Coin from Dropdown
+function selectMoreCoin(select) {
+    if (select.value) {
+        const [symbol, apy] = select.value.split(':');
+        const name = select.options[select.selectedIndex].text.split('(')[0].trim();
+        
+        // Remove selection from coin cards
+        document.querySelectorAll('.coin-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        selectedCoin = { name, symbol, apy: parseInt(apy) };
+        selectedAPY = parseInt(apy);
+        
+        calculateReturns();
+    }
+}
+
+// Select Duration Function
+function selectDuration(element, days, multiplier) {
+    // Remove previous selection
+    document.querySelectorAll('.duration-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked card
+    element.classList.add('selected');
+    
+    // Store selection
+    selectedDuration = days;
+    durationMultiplier = multiplier;
+    
+    // Calculate returns
+    calculateReturns();
+}
+
+// Set Quick Amount Function
+function setQuickAmount(percentage) {
+    const available = parseFloat(document.getElementById('availableBalance').textContent) || 0;
+    const amount = (available * percentage / 100).toFixed(2);
+    document.getElementById('stakingAmount').value = amount;
+    calculateReturns();
+}
+
+// Calculate Returns Function
+function calculateReturns() {
+    const amount = parseFloat(document.getElementById('stakingAmount').value) || 0;
+    
+    // Update display amount
+    document.getElementById('displayAmount').textContent = amount.toFixed(2);
+    
+    // Calculate APY with duration multiplier
+    const effectiveAPY = selectedAPY * durationMultiplier;
+    document.getElementById('displayAPY').textContent = effectiveAPY.toFixed(0);
+    
+    // Update duration
+    document.getElementById('displayDuration').textContent = selectedDuration;
+    
+    // Calculate total returns
+    if (amount > 0 && selectedAPY > 0 && selectedDuration > 0) {
+        const dailyRate = (effectiveAPY / 100) / 365;
+        const returns = amount * dailyRate * selectedDuration;
+        document.getElementById('displayReturns').textContent = returns.toFixed(2);
+    } else {
+        document.getElementById('displayReturns').textContent = '0.00';
+    }
+}
+
+// Start Staking Function
+function startStaking() {
+    const amount = parseFloat(document.getElementById('stakingAmount').value) || 0;
+    
+    if (!selectedCoin) {
+        alert('Please select a cryptocurrency');
+        return;
+    }
+    
+    if (selectedDuration === 0) {
+        alert('Please select a staking duration');
+        return;
+    }
+    
+    if (amount <= 0) {
+        alert('Please enter a valid staking amount');
+        return;
+    }
+    
+    const effectiveAPY = (selectedAPY * durationMultiplier).toFixed(0);
+    const dailyRate = (effectiveAPY / 100) / 365;
+    const totalReturns = (amount * dailyRate * selectedDuration).toFixed(2);
+    
+    // Here you would typically make an API call to start staking
+    // For now, we'll show a confirmation
+    const confirmation = confirm(
+        `Confirm Staking Details:\n\n` +
+        `Cryptocurrency: ${selectedCoin.name} (${selectedCoin.symbol})\n` +
+        `Amount: $${amount.toFixed(2)}\n` +
+        `Duration: ${selectedDuration} days\n` +
+        `APY: ${effectiveAPY}%\n` +
+        `Estimated Returns: $${totalReturns}\n\n` +
+        `Do you want to proceed?`
+    );
+    
+    if (confirmation) {
+        alert('Staking initiated successfully! Your funds are now earning rewards.');
+        
+        // Reset form
+        document.getElementById('stakingAmount').value = '';
+        document.querySelectorAll('.coin-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.querySelectorAll('.duration-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        selectedCoin = null;
+        selectedAPY = 0;
+        selectedDuration = 0;
+        durationMultiplier = 1;
+        calculateReturns();
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Any initialization code can go here
+    console.log('Staking page loaded successfully');
+});
+    </script>
+</body>
+</html>

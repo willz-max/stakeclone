@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Live Trading</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- THEME VARIABLES (From your Index.html) --- */
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #999999;
+            --accent-cyan: #00d9ff;
+            --accent-red: #ff4d4d; /* For Sell Mode */
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --border-color: #2a2a2a;
+            --sidebar-width: 50px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- NAVIGATION (Matches Index.html exactly) --- */
+        .side-tab {
+            position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh;
+            background-color: var(--bg-secondary); border-right: 1px solid var(--border-color);
+            z-index: 998; display: flex; flex-direction: column;
+        }
+        .side-tab-header { height: 70px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border-color); }
+        .hamburger-btn { width: 100%; height: 100%; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: color 0.3s; }
+        .hamburger-btn:hover { color: var(--accent-cyan); }
+        .side-tab-icons { flex: 1; padding: 20px 0; display: flex; flex-direction: column; gap: 5px; }
+        .tab-icon { height: 50px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; font-size: 1.2rem; }
+        .tab-icon:hover, .tab-icon.active { color: var(--accent-cyan); background-color: rgba(0, 217, 255, 0.05); border-left-color: var(--accent-cyan); }
+
+        /* Sliding Sidebar */
+        .sidebar {
+            position: fixed; left: -280px; top: 0; width: 280px; height: 100vh;
+            background-color: var(--bg-secondary); transition: left 0.3s ease; z-index: 1000;
+            overflow-y: auto; border-right: 1px solid var(--border-color); box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .user-details h6 { margin: 0; font-size: 14px; font-weight: 600; }
+        .user-details p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+        .close-sidebar { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; padding: 5px; transition: color 0.3s; }
+        .close-sidebar:hover { color: var(--text-primary); }
+        .sidebar-menu { padding: 20px 0; }
+        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; color: var(--text-secondary); text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background-color: var(--bg-card); color: var(--accent-cyan); border-left-color: var(--accent-cyan); }
+        .menu-item i { width: 20px; font-size: 18px; }
+        .menu-divider { padding: 10px 20px; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 999; display: none; }
+        .overlay.active { display: block; }
+
+        /* Main Wrapper & Header */
+        .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; }
+        .top-header {
+            height: 70px; background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 30px; position: sticky; top: 0; z-index: 900;
+        }
+        .header-title { font-size: 1.5rem; font-weight: 600; }
+        .user-actions { display: flex; align-items: center; gap: 20px; }
+        .user-avatar-small { width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+        .btn-logout { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: background 0.3s; cursor: pointer; }
+        .btn-logout:hover { background-color: #bb2d3b; }
+
+        /* --- TRADING DASHBOARD STYLES --- */
+        .content-container { padding: 30px; }
+        
+        .promo-banner {
+            background: linear-gradient(90deg, #0d1b2a 0%, #1e1e1e 100%);
+            border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;
+            margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;
+        }
+        .btn-level-up {
+            background: linear-gradient(90deg, var(--accent-cyan), #00b4d8);
+            border: none; color: #000; font-weight: bold; padding: 10px 25px; border-radius: 6px;
+        }
+
+        /* Chart */
+        .chart-container {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+            height: 500px; margin-bottom: 25px; overflow: hidden; position: relative;
+        }
+
+        /* Order Form Card */
+        .order-card {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+            padding: 30px; margin-bottom: 25px;
+        }
+
+        /* Buy/Sell Tabs */
+        .trade-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 25px; }
+        .trade-tab-btn {
+            flex: 1; padding: 15px; background: transparent; border: none; color: var(--text-secondary);
+            font-weight: 600; font-size: 1.1rem; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.3s;
+        }
+        .trade-tab-btn.buy.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); background: rgba(0, 217, 255, 0.05); }
+        .trade-tab-btn.sell.active { color: var(--accent-red); border-bottom-color: var(--accent-red); background: rgba(255, 77, 77, 0.05); }
+
+        /* Inputs */
+        .input-group-custom { margin-bottom: 20px; }
+        .input-label { display: block; color: var(--text-secondary); margin-bottom: 8px; font-size: 0.9rem; }
+        
+        .custom-select, .custom-input {
+            width: 100%; background-color: var(--bg-primary); border: 1px solid var(--border-color);
+            color: white; padding: 15px; border-radius: 8px; font-size: 1rem; outline: none;
+        }
+        .custom-select:focus, .custom-input:focus { border-color: var(--accent-cyan); }
+        
+        .amount-wrapper { position: relative; }
+        .currency-tag { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+
+        /* Quick Amounts */
+        .quick-amounts { display: flex; gap: 10px; margin-bottom: 25px; }
+        .amt-btn {
+            flex: 1; background: var(--bg-primary); border: 1px solid var(--border-color);
+            color: var(--text-secondary); padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .amt-btn:hover { border-color: var(--text-secondary); color: white; }
+
+        /* Range Slider */
+        .range-container { margin-bottom: 30px; }
+        .range-labels { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 10px; }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: white; margin-top: -7px; box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; border-radius: 2px; background: var(--border-color);
+        }
+
+        /* Action Button */
+        .action-btn {
+            width: 100%; padding: 18px; border: none; border-radius: 8px;
+            font-weight: 700; font-size: 1.1rem; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+        .action-btn.buy { background-color: var(--accent-cyan); color: #000; box-shadow: 0 0 20px rgba(0, 217, 255, 0.3); }
+        .action-btn.sell { background-color: var(--accent-red); color: white; box-shadow: 0 0 20px rgba(255, 77, 77, 0.3); }
+
+        /* History Table */
+        .history-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .history-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .h-tabs button {
+            background: none; border: none; color: var(--text-secondary); padding: 5px 15px; margin-left: 5px; cursor: pointer; border-radius: 4px;
+        }
+        .h-tabs button.active { background-color: rgba(255,255,255,0.1); color: var(--accent-cyan); }
+        
+        .table-responsive { width: 100%; overflow-x: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; color: var(--text-secondary); font-size: 0.9rem; }
+        .custom-table th { text-align: left; padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; }
+        .custom-table td { padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+        .custom-table tr:last-child td { border-bottom: none; }
+        
+        .text-green { color: var(--accent-cyan) !important; }
+        .text-red { color: var(--accent-red) !important; }
+
+        @media (max-width: 768px) {
+            .side-tab { display: none; } /* Hide strip on mobile */
+            .main-wrapper { margin-left: 0; }
+            .content-container { padding: 15px; }
+            .top-header { padding: 0 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+           <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon " title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon active" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html"  class="tab-icon" title="Staking" >
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item"><i class="fas fa-home"></i><span>Overview</span></a>
+            <a href="staking.html" class="menu-item"><i class="fas fa-coins"></i><span>Staking</span></a>
+            <a href="plan.html" class="menu-item"><i class="fas fa-briefcase"></i><span>Plan</span></a>
+            <a href="live-trading.html" class="menu-item active"><i class="fas fa-chart-line"></i><span>Live Trading</span></a>
+            <a href="deposit.html" class="menu-item"><i class="fas fa-wallet"></i><span>Deposit</span></a>
+            <div class="menu-divider">MORE</div>
+            <a href="copy-trading.html" class="menu-item"><i class="fas fa-copy"></i><span>Copy Traders</span></a>
+            <a href="transaction.html" class="menu-item"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a>
+            <a href="withdraw.html" class="menu-item"><i class="fas fa-money-bill-wave"></i><span>Withdraw Funds</span></a>
+            <a href="kyc.html" class="menu-item"><i class="fas fa-user-check"></i><span>KYC</span></a>
+            <a href="profile.html" class="menu-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="d-flex align-items-center gap-3">
+                <button class="hamburger-btn d-md-none" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <div class="header-title"><img src="assets/img/logo.png" alt=""></div>
+            </div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout"><i class="fas fa-sign-out-alt"></i><span class="d-none d-sm-inline ms-1">Logout</span></button>
+            </div>
+        </header>
+
+        <div class="content-container">
+            
+            <div class="promo-banner">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-rocket fa-2x text-info"></i>
+                    <div>
+                        <h5 class="mb-1 fw-bold text-white">Ready to go Solo?</h5>
+                        <p class="mb-0 text-secondary small">Unlock exclusive Solo Staking with higher returns and advanced tools.</p>
+                    </div>
+                </div>
+                <button class="btn-level-up">Level Up Now <i class="fas fa-arrow-right ms-2"></i></button>
+            </div>
+
+            <h5 class="fw-bold mb-3">Market Chart</h5>
+            <div class="chart-container" id="chart-container">
+                </div>
+
+            <div class="order-card">
+                <div class="trade-tabs">
+                    <button class="trade-tab-btn buy active" onclick="toggleTradeMode('buy')">BUY</button>
+                    <button class="trade-tab-btn sell" onclick="toggleTradeMode('sell')">SELL</button>
+                </div>
+
+                <div class="input-group-custom">
+                    <label class="input-label">Trading Pair</label>
+                    <select class="custom-select" id="pairSelect" onchange="updateChart()">
+                        <option value="BINANCE:BTCUSDT">BTC-USD (Bitcoin)</option>
+                        <option value="BINANCE:ETHUSDT">ETH-USD (Ethereum)</option>
+                        <option value="BINANCE:SOLUSDT">SOL-USD (Solana)</option>
+                        <option value="BINANCE:BNBUSDT">BNB-USD (Binance Coin)</option>
+                        <option value="BINANCE:XRPUSDT">XRP-USD (Ripple)</option>
+                    </select>
+                </div>
+
+                <div class="input-group-custom">
+                    <label class="input-label">Trade Amount</label>
+                    <div class="amount-wrapper">
+                        <input type="number" class="custom-input" placeholder="Enter amount" id="tradeAmount">
+                        <span class="currency-tag">USD</span>
+                    </div>
+                </div>
+
+                <div class="quick-amounts">
+                    <button class="amt-btn" onclick="setAmount(100)">$100</button>
+                    <button class="amt-btn" onclick="setAmount(500)">$500</button>
+                    <button class="amt-btn" onclick="setAmount(1000)">$1000</button>
+                    <button class="amt-btn" onclick="setAmount(5000)">$5000</button>
+                </div>
+
+                <div class="range-container">
+                    <div class="range-labels">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="0" id="tradeSlider" oninput="updateSliderUI(this.value)">
+                </div>
+
+                <button class="action-btn buy" id="mainActionBtn">BUY NOW</button>
+            </div>
+
+            <div class="history-card">
+                <div class="history-header">
+                    <h6 class="mb-0 fw-bold">Trade Status</h6>
+                    <div class="h-tabs">
+                        <button class="active" onclick="showTab('active-orders', this)">Active Orders</button>
+                        <button onclick="showTab('order-history', this)">Order History</button>
+                        <button onclick="showTab('trade-history', this)">Trade History</button>
+                    </div>
+                </div>
+
+                <div id="active-orders" class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th> <th>Pair</th> <th>Type</th> <th>Entry Price</th> <th>Amount</th> <th>P/L</th> <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2023-10-25</td> <td>BTC/USD</td> <td class="text-green">BUY</td> <td>$34,150</td> <td>$500</td> <td class="text-green">+$12.50</td> <td>Active</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="order-history" class="table-responsive" style="display: none;">
+                    <div style="padding: 40px; text-align: center;">No order history available.</div>
+                </div>
+
+                <div id="trade-history" class="table-responsive" style="display: none;">
+                     <div style="padding: 40px; text-align: center;">No trade history available.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // --- Sidebar Logic ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        // --- Trade Amount Logic ---
+        function setAmount(val) {
+            document.getElementById('tradeAmount').value = val;
+        }
+
+        // --- Buy/Sell Toggle Logic ---
+        function toggleTradeMode(mode) {
+            const btn = document.getElementById('mainActionBtn');
+            const slider = document.getElementById('tradeSlider');
+            const buyTab = document.querySelector('.trade-tab-btn.buy');
+            const sellTab = document.querySelector('.trade-tab-btn.sell');
+
+            if(mode === 'buy') {
+                btn.innerText = "BUY NOW";
+                btn.className = "action-btn buy";
+                buyTab.classList.add('active');
+                sellTab.classList.remove('active');
+                // Trigger slider update for color
+                updateSliderUI(slider.value, 'buy');
+            } else {
+                btn.innerText = "SELL NOW";
+                btn.className = "action-btn sell";
+                sellTab.classList.add('active');
+                buyTab.classList.remove('active');
+                // Trigger slider update for color
+                updateSliderUI(slider.value, 'sell');
+            }
+        }
+
+        // --- Slider Color Logic ---
+        function updateSliderUI(val, forceMode) {
+            const slider = document.getElementById('tradeSlider');
+            // Determine current mode if not forced
+            let isBuy = document.querySelector('.trade-tab-btn.buy').classList.contains('active');
+            if(forceMode) isBuy = (forceMode === 'buy');
+            
+            const color = isBuy ? '#00d9ff' : '#ff4d4d'; // Cyan or Red
+            
+            // Update track background gradient
+            slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${val}%, #2a2a2a ${val}%, #2a2a2a 100%)`;
+        }
+
+        // --- Tab Switcher Logic ---
+        function showTab(tabId, btn) {
+            document.getElementById('active-orders').style.display = 'none';
+            document.getElementById('order-history').style.display = 'none';
+            document.getElementById('trade-history').style.display = 'none';
+            document.getElementById(tabId).style.display = 'block';
+            
+            document.querySelectorAll('.h-tabs button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // --- TradingView Chart Logic ---
+        function loadTradingView(symbol) {
+            const container = document.getElementById('chart-container');
+            container.innerHTML = ''; // Clear existing
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+            script.async = true;
+            script.innerHTML = JSON.stringify({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "enable_publishing": false,
+                "backgroundColor": "rgba(30, 30, 30, 1)",
+                "gridColor": "rgba(42, 42, 42, 1)",
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "calendar": false,
+                "hide_volume": true,
+                "support_host": "https://www.tradingview.com"
+            });
+            container.appendChild(script);
+        }
+
+        function updateChart() {
+            const symbol = document.getElementById('pairSelect').value;
+            loadTradingView(symbol);
+        }
+
+        // Init
+        updateSliderUI(0);
+        loadTradingView("BINANCE:BTCUSDT");
+
+    </script>
+</body>
+</html>

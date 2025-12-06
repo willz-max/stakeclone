@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Deposit Funds</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #999999;
+            --accent-cyan: #00d9ff;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cashapp: #00D632; /* Cash App Green */
+            --border-color: #2a2a2a;
+            --sidebar-width: 50px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- REUSED SIDEBAR & HEADER STYLES (From Index) --- */
+        .side-tab {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            z-index: 998;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-tab-header {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hamburger-btn {
+            width: 100%;
+            height: 100%;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .hamburger-btn:hover {
+            color: var(--accent-cyan);
+        }
+
+        .side-tab-icons {
+            flex: 1;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .tab-icon {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-size: 1.2rem;
+        }
+
+        .tab-icon:hover, .tab-icon.active {
+            color: var(--accent-cyan);
+            background-color: rgba(0, 217, 255, 0.05);
+            border-left-color: var(--accent-cyan);
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .user-details h6 { margin: 0; font-size: 14px; font-weight: 600; }
+        .user-details p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+        .close-sidebar:hover { color: var(--text-primary); }
+
+        .sidebar-menu { padding: 20px 0; }
+
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--bg-card);
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+        }
+
+        .menu-item i { width: 20px; font-size: 18px; }
+        .menu-divider { padding: 10px 20px; font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); z-index: 999; display: none;
+        }
+        .overlay.active { display: block; }
+
+        .main-wrapper { margin-left: var(--sidebar-width); min-height: 100vh; }
+
+        .top-header {
+            height: 70px;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .header-title { font-size: 1.5rem; font-weight: 600; }
+        .user-actions { display: flex; align-items: center; gap: 20px; }
+        .user-avatar-small {
+            width: 35px; height: 35px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold;
+        }
+        .btn-logout {
+            background-color: #dc3545; color: white; border: none; padding: 8px 16px;
+            border-radius: 6px; font-size: 14px; transition: background 0.3s; cursor: pointer;
+        }
+        .btn-logout:hover { background-color: #bb2d3b; }
+        .content-container { padding: 30px; }
+
+        /* --- DEPOSIT SPECIFIC STYLES --- */
+        
+        /* Toggle Buttons */
+        .deposit-toggle-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .deposit-method-btn {
+            flex: 1;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .deposit-method-btn i {
+            font-size: 1.5rem;
+        }
+
+        .deposit-method-btn:hover {
+            background-color: var(--bg-card);
+        }
+
+        /* Active Crypto */
+        .deposit-method-btn.active-crypto {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+        }
+
+        /* Active Cash App */
+        .deposit-method-btn.active-cashapp {
+            border-color: var(--accent-cashapp);
+            color: var(--accent-cashapp);
+            box-shadow: 0 0 15px rgba(0, 214, 50, 0.1);
+        }
+
+        /* Form Card */
+        .deposit-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Custom Inputs */
+        .custom-label {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .custom-input-group {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .custom-input {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            width: 100%;
+            padding: 12px 15px;
+            outline: none;
+        }
+        
+        .custom-input::placeholder {
+            color: #555;
+        }
+
+        .custom-input:disabled {
+            background-color: transparent;
+            color: var(--text-secondary);
+        }
+
+        .custom-select {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 6px;
+            width: 100%;
+            outline: none;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+
+        .input-icon-btn {
+            background: #2d2d2d;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 15px;
+            cursor: pointer;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .input-icon-btn:hover {
+            color: #fff;
+        }
+
+        /* QR Placeholder */
+        .qr-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .qr-box {
+            width: 120px;
+            height: 120px;
+            background-color: #fff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cash App Specifics */
+        .cashapp-instruction {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--accent-cashapp);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cashapp-icon-circle {
+            width: 35px;
+            height: 35px;
+            background-color: var(--accent-cashapp);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .btn-confirm-payment {
+            width: 100%;
+            background-color: var(--accent-cashapp);
+            color: #000;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-confirm-payment:hover {
+            background-color: #00b32a;
+            transform: translateY(-2px);
+        }
+
+        .warning-text {
+            color: #ffc107;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 280px; }
+            .top-header { padding: 0 15px; }
+            .content-container { padding: 20px 15px; }
+            .deposit-card { padding: 20px; }
+        }
+        @media (max-width: 576px) {
+            .sidebar { width: 85%; max-width: 280px; }
+            .deposit-toggle-container { flex-direction: row; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+            <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon" title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon active" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html" class="tab-icon" title="Staking">
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="staking.html" class="menu-item">
+                <i class="fas fa-coins"></i>
+                <span>Staking</span>
+            </a>
+            <a href="plan.html" class="menu-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Plan</span>
+            </a>
+            <a href="live-trading.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Live Trading</span>
+            </a>
+            <a href="deposit.html" class="menu-item active">
+                <i class="fas fa-wallet"></i>
+                <span>Deposit</span>
+            </a>
+
+            <div class="menu-divider">MORE</div>
+
+            <a href="copy-trading.html" class="menu-item">
+                <i class="fas fa-copy"></i>
+                <span>Copy Traders</span>
+            </a>
+            <a href="transaction.html" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="withdraw.html" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdraw Funds</span>
+            </a>
+            <a href="kyc.html" class="menu-item">
+                <i class="fas fa-user-check"></i>
+                <span>KYC</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="header-title">Deposit Funds</div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-container">
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="deposit-toggle-container">
+                        <div class="deposit-method-btn active-crypto" id="btn-crypto" onclick="showCrypto()">
+                            <i class="fas fa-wallet"></i>
+                            <span>Crypto Transfer</span>
+                        </div>
+                        <div class="deposit-method-btn" id="btn-cashapp" onclick="showCashApp()">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Cash App (P2P)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="deposit-card">
+                
+                <div id="crypto-section">
+                    <label class="custom-label">Select Preferred Crypto</label>
+                    <select class="custom-select" id="crypto-select" onchange="updateWallet()">
+                        <option value="bitcoin">Bitcoin (BTC)</option>
+                        <option value="ethereum">Ethereum (ETH)</option>
+                        <option value="usdt">USDT (TRC20)</option>
+                    </select>
+
+                    <label class="custom-label">Wallet Address</label>
+                    <div class="custom-input-group">
+                        <input type="text" class="custom-input" id="wallet-address" value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" readonly>
+                        <button class="input-icon-btn" onclick="copyToClipboard('wallet-address')">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <div class="qr-placeholder">
+                        <div class="qr-box">
+                            <i class="fas fa-qrcode" style="font-size: 3rem; color: #000;"></i>
+                        </div>
+                        <div class="text-secondary small">Scan to copy address</div>
+                    </div>
+
+                    <label class="custom-label">Amount (USD)</label>
+                    <div class="custom-input-group">
+                        <span class="input-icon-btn" style="border:none; border-right: 1px solid var(--border-color); background:transparent;">$</span>
+                        <input type="number" class="custom-input" placeholder="Enter deposit amount">
+                    </div>
+
+                      <div class="mt-5">
+                        <div class="warning-text">
+                            <i class="fas fa-exclamation-triangle me-1"></i> 
+                            Please complete payment before confirming
+                        </div>
+                        <button class="btn-confirm-payment" style="background-color: #00d9ff;">
+                            <i class="fas fa-check-circle me-2"></i> I Have Completed Payment
+                        </button>
+                    </div>
+                </div>
+
+                <div id="cashapp-section" style="display: none;">
+                    
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="cashapp-icon-circle"><i class="fas fa-dollar-sign"></i></div>
+                        <h5 class="mb-0 fw-bold">Cash App Transfer</h5>
+                    </div>
+
+                    <div class="cashapp-instruction">
+                        <div class="text-secondary small">
+                            Send money to the Cash App tag below, then confirm your payment
+                        </div>
+                    </div>
+
+                    <label class="custom-label">Cash App Tag</label>
+                    <div class="custom-input-group">
+                        <input type="text" class="custom-input" id="cashapp-tag" value="$StakeCloneAdmin" readonly>
+                        <button class="input-icon-btn" onclick="copyToClipboard('cashapp-tag')">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+
+                    <label class="custom-label">Amount (USD)</label>
+                    <div class="custom-input-group">
+                        <span class="input-icon-btn" style="border:none; border-right: 1px solid var(--border-color); background:transparent;">$</span>
+                        <input type="number" class="custom-input" placeholder="Enter deposit amount">
+                    </div>
+
+                    <div class="mt-5">
+                        <div class="warning-text">
+                            <i class="fas fa-exclamation-triangle me-1"></i> 
+                            Please complete payment before confirming
+                        </div>
+                        <button class="btn-confirm-payment">
+                            <i class="fas fa-check-circle me-2"></i> I Have Completed Payment
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- Sidebar Logic (Same as Index) ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (window.innerWidth <= 768) { closeSidebar(); }
+            });
+        });
+
+        // --- Deposit Page Logic ---
+
+        // Switch to Crypto
+        function showCrypto() {
+            document.getElementById('crypto-section').style.display = 'block';
+            document.getElementById('cashapp-section').style.display = 'none';
+            
+            // Update Buttons
+            document.getElementById('btn-crypto').classList.add('active-crypto');
+            document.getElementById('btn-cashapp').classList.remove('active-cashapp');
+        }
+
+        // Switch to Cash App
+        function showCashApp() {
+            document.getElementById('crypto-section').style.display = 'none';
+            document.getElementById('cashapp-section').style.display = 'block';
+            
+            // Update Buttons
+            document.getElementById('btn-crypto').classList.remove('active-crypto');
+            document.getElementById('btn-cashapp').classList.add('active-cashapp');
+        }
+
+        // Mock Wallet Address Update
+        function updateWallet() {
+            const select = document.getElementById('crypto-select');
+            const input = document.getElementById('wallet-address');
+            
+            if(select.value === 'bitcoin') {
+                input.value = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
+            } else if (select.value === 'ethereum') {
+                input.value = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+            } else if (select.value === 'usdt') {
+                input.value = 'T9yD14Nj9j7xAB4dbGeiX9h8zzDXL5D6aP';
+            }
+        }
+
+        // Copy Function
+        function copyToClipboard(elementId) {
+            var copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(copyText.value);
+            
+            // Optional: Visual feedback could be added here
+            alert("Copied to clipboard: " + copyText.value);
+        }
+    </script>
+</body>
+</html>

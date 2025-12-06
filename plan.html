@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Staking Plans</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+   <style>
+    :root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #999999;
+    --accent-cyan: #00d9ff;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-yellow: #fbbf24;
+    --border-color: #2a2a2a;
+    --sidebar-width: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Permanent Side Tab */
+.side-tab {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-tab-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hamburger-btn {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.hamburger-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.side-tab-icons {
+    flex: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tab-icon {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    font-size: 1.2rem;
+}
+
+.tab-icon:hover,
+.tab-icon.active {
+    color: var(--accent-cyan);
+    background-color: rgba(0, 217, 255, 0.05);
+    border-left-color: var(--accent-cyan);
+}
+
+/* Sliding Sidebar */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.user-details h6 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.close-sidebar:hover {
+    color: var(--text-primary);
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background-color: var(--bg-card);
+    color: var(--accent-cyan);
+    border-left-color: var(--accent-cyan);
+}
+
+.menu-item i {
+    width: 20px;
+    font-size: 18px;
+}
+
+.menu-divider {
+    padding: 10px 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Main Content */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.top-header {
+    height: 70px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #bb2d3b;
+}
+
+/* Content Container */
+.content-container {
+    padding: 30px;
+}
+
+/* Page Header */
+.staking-page-header {
+    margin-bottom: 2.5rem;
+}
+
+.header-icon-staking {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 15px;
+    font-size: 2.5rem;
+}
+
+.staking-main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+.staking-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Balance Info Cards */
+.balance-info-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.balance-info-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.balance-info-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+.balance-info-plan {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #4a9eff;
+}
+
+/* Insufficient Balance Alert */
+.insufficient-balance-alert {
+    background-color: rgba(120, 80, 20, 0.3);
+    border: 1px solid var(--accent-yellow);
+    border-left: 4px solid var(--accent-yellow);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.insufficient-balance-alert i {
+    color: var(--accent-yellow);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.insufficient-balance-alert strong {
+    color: var(--accent-yellow);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.insufficient-balance-alert p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Staking Plan Cards */
+.staking-plan-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.staking-plan-card:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 217, 255, 0.1);
+}
+
+.plan-header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.plan-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.plan-premium-badge {
+    background-color: rgba(0, 217, 255, 0.2);
+    color: var(--accent-cyan);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.plan-minimum-stake {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.plan-stake-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    margin-bottom: 5px;
+}
+
+.plan-stake-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Plan Details Grid */
+.plan-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.plan-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.plan-detail-icon {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 217, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.plan-detail-icon i {
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+}
+
+.plan-detail-label {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+}
+
+.plan-detail-value {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+/* Start Button */
+.plan-start-button {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--accent-cyan);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+}
+
+.plan-start-button:hover {
+    background-color: #00c4e6;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+}
+
+.plan-start-button i {
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .top-header {
+        padding: 0 15px;
+    }
+
+    .content-container {
+        padding: 20px 15px;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    .staking-main-title {
+        font-size: 2rem;
+    }
+
+    .header-icon-staking {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+
+    .plan-details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+
+    .staking-main-title {
+        font-size: 1.75rem;
+    }
+
+    .staking-subtitle {
+        font-size: 1rem;
+    }
+
+    .plan-stake-amount {
+        font-size: 2rem;
+    }
+}
+   </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Permanent Side Tab -->
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+            <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon" title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html" class="tab-icon active" title="Staking">
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sliding Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="staking.html" class="menu-item">
+                <i class="fas fa-coins"></i>
+                <span>Staking</span>
+            </a>
+            <a href="plan.html" class="menu-item active">
+                <i class="fas fa-briefcase"></i>
+                <span>Plan</span>
+            </a>
+            <a href="live-trading.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Live Trading</span>
+            </a>
+            <a href="deposit.html" class="menu-item">
+                <i class="fas fa-wallet"></i>
+                <span>Deposit</span>
+            </a>
+
+            <div class="menu-divider">MORE</div>
+
+            <a href="copy-trading.html" class="menu-item">
+                <i class="fas fa-copy"></i>
+                <span>Copy Traders</span>
+            </a>
+            <a href="transaction.html" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="withdraw.html" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdraw Funds</span>
+            </a>
+            <a href="kyc.html" class="menu-item">
+                <i class="fas fa-user-check"></i>
+                <span>KYC</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title"><img src="assets/img/logo.png" alt=""></div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Staking Content -->
+        <div class="content-container">
+            <!-- Page Header -->
+            <div class="staking-page-header text-center mb-5">
+                <div class="header-icon-staking mb-3">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <h1 class="staking-main-title mb-2">Staking Plans</h1>
+                <p class="staking-subtitle">Choose from our premium staking plans to maximize your returns</p>
+            </div>
+
+            <!-- Balance Cards Row -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="balance-info-card">
+                        <div class="balance-info-label">AVAILABLE BALANCE</div>
+                        <div class="balance-info-amount">$0.00</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="balance-info-card">
+                        <div class="balance-info-label">CURRENT PLAN</div>
+                        <div class="balance-info-plan">No Active Plan</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Alert -->
+            <div class="insufficient-balance-alert mb-4">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Insufficient Balance</strong>
+                    <p>Your balance is low. Please deposit more funds to access staking plans.</p>
+                </div>
+            </div>
+
+            <!-- Staking Plans Grid -->
+            <div class="row g-4">
+                <!-- Plan 1: STAKING -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="staking-plan-card">
+                        <div class="plan-header-section">
+                            <h3 class="plan-name">STAKING</h3>
+                            <span class="plan-premium-badge">PREMIUM</span>
+                        </div>
+
+                        <div class="plan-minimum-stake">
+                            <div class="plan-stake-amount">$1,000</div>
+                            <div class="plan-stake-label">MINIMUM STAKE</div>
+                        </div>
+
+                        <div class="plan-details-grid">
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">APY</div>
+                                    <div class="plan-detail-value">120.00%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">DURATION</div>
+                                    <div class="plan-detail-value">4 weeks</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">TOTAL RETURNS</div>
+                                    <div class="plan-detail-value">9.23%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">MAX STAKE</div>
+                                    <div class="plan-detail-value">$5,000</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="plan-start-button" onclick="startStaking('STAKING', 1000)">
+                            <i class="fas fa-rocket"></i>
+                            START STAKING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan 2: SOLO STAKING -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="staking-plan-card">
+                        <div class="plan-header-section">
+                            <h3 class="plan-name">SOLO STAKING</h3>
+                            <span class="plan-premium-badge">PREMIUM</span>
+                        </div>
+
+                        <div class="plan-minimum-stake">
+                            <div class="plan-stake-amount">$5,000</div>
+                            <div class="plan-stake-label">MINIMUM STAKE</div>
+                        </div>
+
+                        <div class="plan-details-grid">
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">APY</div>
+                                    <div class="plan-detail-value">120.00%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">DURATION</div>
+                                    <div class="plan-detail-value">8 weeks</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">TOTAL RETURNS</div>
+                                    <div class="plan-detail-value">35.50%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">MAX STAKE</div>
+                                    <div class="plan-detail-value">$25,000</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="plan-start-button" onclick="startStaking('SOLO STAKING', 5000)">
+                            <i class="fas fa-rocket"></i>
+                            START STAKING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan 3: ADVANCED STAKING -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="staking-plan-card">
+                        <div class="plan-header-section">
+                            <h3 class="plan-name">ADVANCED STAKING</h3>
+                            <span class="plan-premium-badge">PREMIUM</span>
+                        </div>
+
+                        <div class="plan-minimum-stake">
+                            <div class="plan-stake-amount">$10,000</div>
+                            <div class="plan-stake-label">MINIMUM STAKE</div>
+                        </div>
+
+                        <div class="plan-details-grid">
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">APY</div>
+                                    <div class="plan-detail-value">150.00%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">DURATION</div>
+                                    <div class="plan-detail-value">16 weeks</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">TOTAL RETURNS</div>
+                                    <div class="plan-detail-value">46.15%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">MAX STAKE</div>
+                                    <div class="plan-detail-value">$50,000</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="plan-start-button" onclick="startStaking('ADVANCED STAKING', 10000)">
+                            <i class="fas fa-rocket"></i>
+                            START STAKING
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan 4: DeFi STAKING -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="staking-plan-card">
+                        <div class="plan-header-section">
+                            <h3 class="plan-name">DeFi STAKING</h3>
+                            <span class="plan-premium-badge">PREMIUM</span>
+                        </div>
+
+                        <div class="plan-minimum-stake">
+                            <div class="plan-stake-amount">$50,000</div>
+                            <div class="plan-stake-label">MINIMUM STAKE</div>
+                        </div>
+
+                        <div class="plan-details-grid">
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">APY</div>
+                                    <div class="plan-detail-value">150.00%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">DURATION</div>
+                                    <div class="plan-detail-value">20 weeks</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">TOTAL RETURNS</div>
+                                    <div class="plan-detail-value">57.69%</div>
+                                </div>
+                            </div>
+
+                            <div class="plan-detail-item">
+                                <div class="plan-detail-icon">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <div class="plan-detail-label">MAX STAKE</div>
+                                    <div class="plan-detail-value">$100,000</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="plan-start-button" onclick="startStaking('DeFi STAKING', 50000)">
+                            <i class="fas fa-rocket"></i>
+                            START STAKING
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+   // Toggle Sidebar Function
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+}
+
+// Close Sidebar Function
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Close sidebar on menu item click (mobile)
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+});
+
+// Staking plan data
+const stakingPlans = {
+    'STAKING': {
+        name: 'STAKING',
+        apy: '120',
+        duration: '4 weeks',
+        minStake: 1000,
+        maxStake: 5000,
+        totalReturns: '9.23'
+    },
+    'SOLO STAKING': {
+        name: 'SOLO STAKING',
+        apy: '120',
+        duration: '8 weeks',
+        minStake: 5000,
+        maxStake: 25000,
+        totalReturns: '35.50'
+    },
+    'ADVANCED STAKING': {
+        name: 'ADVANCED STAKING',
+        apy: '150',
+        duration: '16 weeks',
+        minStake: 10000,
+        maxStake: 50000,
+        totalReturns: '46.15'
+    },
+    'DeFi STAKING': {
+        name: 'DeFi STAKING',
+        apy: '150',
+        duration: '20 weeks',
+        minStake: 50000,
+        maxStake: 100000,
+        totalReturns: '57.69'
+    }
+};
+
+// Start Staking Function
+function startStaking(planName, minimumAmount) {
+    const plan = stakingPlans[planName];
+    showStakingModal(plan);
+}
+
+// Show Enhanced Staking Modal
+function showStakingModal(plan) {
+    const modal = document.createElement('div');
+    modal.className = 'staking-modal-overlay active';
+    modal.innerHTML = `
+        <div class="enhanced-staking-modal">
+            <div class="modal-header-enhanced">
+                <h3>Start Staking</h3>
+                <button class="modal-close-btn-x" onclick="closeEnhancedModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body-enhanced">
+                <!-- Plan Info Card -->
+                <div class="plan-info-highlight">
+                    <div class="plan-info-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="plan-info-details">
+                        <h4>${plan.name}</h4>
+                        <div class="plan-quick-stats">
+                            <span><i class="fas fa-percentage"></i> ${plan.apy}% APY</span>
+                            <span><i class="fas fa-calendar"></i> ${plan.duration}</span>
+                        </div>
+                        <div class="plan-stake-range">Min: $${plan.minStake.toLocaleString()} - Max: $${plan.maxStake.toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <!-- Selected Plan Display -->
+                <div class="selected-plan-section">
+                    <label class="modal-section-label">Selected Plan</label>
+                    <div class="selected-plan-display">${plan.name}</div>
+                </div>
+
+                <!-- Staking Amount Input -->
+                <div class="staking-amount-section">
+                    <label class="modal-section-label">Staking Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="stakingAmountInput" class="staking-amount-input" value="${plan.minStake}" min="${plan.minStake}" max="${plan.maxStake}" step="100">
+                    </div>
+                    
+                    <!-- Percentage Buttons -->
+                    <div class="percentage-buttons">
+                        <button class="percent-btn" onclick="setPercentage(${plan.maxStake}, 25)">25%</button>
+                        <button class="percent-btn" onclick="setPercentage(${plan.maxStake}, 50)">50%</button>
+                        <button class="percent-btn" onclick="setPercentage(${plan.maxStake}, 75)">75%</button>
+                        <button class="percent-btn" onclick="setPercentage(${plan.maxStake}, 100)">MAX</button>
+                    </div>
+                </div>
+
+                <!-- Balance Information -->
+                <div class="balance-info-section">
+                    <div class="balance-info-row">
+                        <span>Available Balance:</span>
+                        <span class="balance-value">$0.00</span>
+                    </div>
+                    <div class="balance-info-row">
+                        <span>Minimum Stake:</span>
+                        <span class="balance-value cyan">$${plan.minStake.toLocaleString()}</span>
+                    </div>
+                    <div class="balance-info-row">
+                        <span>Expected Returns:</span>
+                        <span class="balance-value green" id="expectedReturns">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- Staking Benefits -->
+                <div class="staking-benefits-section">
+                    <div class="benefits-header">
+                        <i class="fas fa-star"></i>
+                        <span>Staking Benefits</span>
+                    </div>
+                    <ul class="benefits-list">
+                        <li>
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure staking with guaranteed returns</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Diversified portfolio management</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Automated staking rewards</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Confirm Button -->
+                <button class="btn-confirm-staking-enhanced" onclick="confirmEnhancedStaking('${plan.name}', ${plan.minStake})">
+                    <i class="fas fa-rocket"></i>
+                    CONFIRM STAKING
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add modal styles
+    addEnhancedModalStyles();
+    
+    // Calculate expected returns on input change
+    const input = document.getElementById('stakingAmountInput');
+    input.addEventListener('input', function() {
+        calculateExpectedReturns(plan.totalReturns);
+    });
+    
+    // Initial calculation
+    calculateExpectedReturns(plan.totalReturns);
+}
+
+// Set Percentage
+function setPercentage(maxStake, percentage) {
+    const amount = Math.floor(maxStake * (percentage / 100));
+    document.getElementById('stakingAmountInput').value = amount;
+    
+    // Trigger input event to recalculate
+    const event = new Event('input');
+    document.getElementById('stakingAmountInput').dispatchEvent(event);
+}
+
+// Calculate Expected Returns
+function calculateExpectedReturns(returnPercentage) {
+    const amount = parseFloat(document.getElementById('stakingAmountInput').value) || 0;
+    const returns = amount * (parseFloat(returnPercentage) / 100);
+    document.getElementById('expectedReturns').textContent = `$${returns.toFixed(2)}`;
+}
+
+// Close Enhanced Modal
+function closeEnhancedModal() {
+    const modal = document.querySelector('.staking-modal-overlay');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+// Confirm Enhanced Staking
+function confirmEnhancedStaking(planName, minStake) {
+    const stakeAmount = parseFloat(document.getElementById('stakingAmountInput').value);
+    
+    if (!stakeAmount || stakeAmount <= 0) {
+        showAlert('Please enter a valid amount', 'error');
+        return;
+    }
+    
+    if (stakeAmount < minStake) {
+        showAlert(`Minimum stake amount is $${minStake.toLocaleString()}`, 'error');
+        return;
+    }
+    
+    // Check balance (simulated)
+    const userBalance = 0.00;
+    if (userBalance < stakeAmount) {
+        showAlert('Insufficient balance! Please deposit funds first.', 'error');
+        return;
+    }
+    
+    // Close modal
+    closeEnhancedModal();
+    
+    // Show success message
+    showAlert(`Successfully initiated ${planName} with $${stakeAmount.toLocaleString()}! Please deposit funds to activate.`, 'success');
+}
+
+// Add Enhanced Modal Styles
+function addEnhancedModalStyles() {
+    if (document.querySelector('#enhanced-modal-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'enhanced-modal-styles';
+    style.textContent = `
+        .staking-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .staking-modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        .enhanced-staking-modal {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 550px;
+            border: 1px solid #2a2a2a;
+            animation: slideUp 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header-enhanced {
+            padding: 20px 25px;
+            border-bottom: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background-color: #1e1e1e;
+            z-index: 10;
+        }
+        
+        .modal-header-enhanced h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .modal-close-btn-x {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        
+        .modal-close-btn-x:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-body-enhanced {
+            padding: 25px;
+        }
+        
+        .plan-info-highlight {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .plan-info-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #00d9ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #0f0f0f;
+            flex-shrink: 0;
+        }
+        
+        .plan-info-details h4 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .plan-quick-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 6px;
+        }
+        
+        .plan-quick-stats span {
+            font-size: 0.85rem;
+            color: #00d9ff;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .plan-stake-range {
+            font-size: 0.8rem;
+            color: #999;
+        }
+        
+        .modal-section-label {
+            display: block;
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .selected-plan-section {
+            margin-bottom: 20px;
+        }
+        
+        .selected-plan-display {
+            background-color: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .staking-amount-section {
+            margin-bottom: 20px;
+        }
+        
+        .amount-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            left: 15px;
+            color: #999;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .staking-amount-input {
+            width: 100%;
+            background-color: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #fff;
+            padding: 12px 15px 12px 35px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .staking-amount-input:focus {
+            outline: none;
+            border-color: #00d9ff;
+            background-color: #1a1a1a;
+        }
+        
+        .percentage-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .percent-btn {
+            background-color: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #999;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .percent-btn:hover {
+            background-color: #3a3a3a;
+            color: #00d9ff;
+            border-color: #00d9ff;
+        }
+        
+        .balance-info-section {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .balance-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .balance-value {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .balance-value.cyan {
+            color: #00d9ff;
+        }
+        
+        .balance-value.green {
+            color: #10b981;
+        }
+        
+        .staking-benefits-section {
+            background-color: rgba(0, 217, 255, 0.05);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .benefits-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00d9ff;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .benefits-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            color: #ccc;
+            font-size: 0.85rem;
+        }
+        
+        .benefits-list li i {
+            color: #00d9ff;
+            font-size: 0.9rem;
+        }
+        
+        .btn-confirm-staking-enhanced {
+            width: 100%;
+            padding: 15px;
+            background-color: #00d9ff;
+            color: #0f0f0f;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-confirm-staking-enhanced:hover {
+            background-color: #00c4e6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .enhanced-staking-modal {
+                max-width: 100%;
+            }
+            
+            .modal-body-enhanced {
+                padding: 20px;
+            }
+            
+            .percentage-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Show Alert Function
+function showAlert(message, type) {
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `custom-alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    if (!document.querySelector('#alert-styles')) {
+        const style = document.createElement('style');
+        style.id = 'alert-styles';
+        style.textContent = `
+            .custom-alert {
+                position: fixed;
+                top: 90px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 25px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideDown 0.3s ease;
+                z-index: 1200;
+                min-width: 300px;
+                max-width: 500px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .alert-success {
+                background-color: #10b981;
+                color: white;
+            }
+            
+            .alert-error {
+                background-color: #dc3545;
+                color: white;
+            }
+            
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.style.animation = 'slideDown 0.3s ease reverse';
+        setTimeout(() => alert.remove(), 300);
+    }, 5000);
+}
+
+// Close modal on overlay click
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('staking-modal-overlay')) {
+        closeEnhancedModal();
+    }
+});
+
+// Close modal on ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEnhancedModal();
+    }
+});
+    </script>
+</body>
+</html>

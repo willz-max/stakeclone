@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Withdraw Funds</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #999999;
+    --accent-cyan: #00d9ff;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-orange: #ff8c42;
+    --border-color: #2a2a2a;
+    --sidebar-width: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Permanent Side Tab */
+.side-tab {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-tab-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hamburger-btn {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.hamburger-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.side-tab-icons {
+    flex: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tab-icon {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    font-size: 1.2rem;
+}
+
+.tab-icon:hover,
+.tab-icon.active {
+    color: var(--accent-cyan);
+    background-color: rgba(0, 217, 255, 0.05);
+    border-left-color: var(--accent-cyan);
+}
+
+/* Sliding Sidebar */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.user-details h6 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.close-sidebar:hover {
+    color: var(--text-primary);
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background-color: var(--bg-card);
+    color: var(--accent-cyan);
+    border-left-color: var(--accent-cyan);
+}
+
+.menu-item i {
+    width: 20px;
+    font-size: 18px;
+}
+
+.menu-divider {
+    padding: 10px 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Main Content */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.top-header {
+    height: 70px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.header-title img {
+    height: 40px;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #bb2d3b;
+}
+
+/* Content Container */
+.content-container {
+    padding: 30px;
+    max-width: 1400px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.custom-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+}
+
+/* Balance Card */
+.balance-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.section-header i {
+    font-size: 1.3rem;
+}
+
+.method-label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+/* Withdrawal Methods */
+.withdrawal-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.method-btn {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.method-btn i {
+    font-size: 2rem;
+}
+
+.method-btn span {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.method-btn:hover {
+    border-color: var(--accent-cyan);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.method-btn.active {
+    border-color: var(--accent-orange);
+    background-color: rgba(255, 140, 66, 0.1);
+    color: var(--accent-orange);
+}
+
+/* Method Forms */
+.method-form {
+    display: none;
+    animation: fadeIn 0.3s;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.method-form.active {
+    display: block;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.form-header i {
+    font-size: 1.5rem;
+    color: var(--accent-orange);
+}
+
+.form-header h6 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.custom-input {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 15px;
+    border-radius: 8px;
+    width: 100%;
+    transition: all 0.3s;
+}
+
+.custom-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    background-color: var(--bg-primary);
+}
+
+.custom-input::placeholder {
+    color: #555;
+}
+
+.form-text {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: block;
+}
+
+.input-group-text {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* Withdrawal Details */
+#withdrawal-details {
+    display: none;
+}
+
+#withdrawal-details.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+.details-header {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.fee-summary {
+    margin: 25px 0;
+    padding: 20px;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+.fee-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.fee-row:last-child {
+    border-bottom: none;
+}
+
+.total-row {
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 2px solid var(--border-color);
+}
+
+/* Submit Button */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent-orange), #ff6b35);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 140, 66, 0.4);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Notice Box */
+.notice-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background-color: rgba(255, 140, 66, 0.1);
+    border: 1px solid var(--accent-orange);
+    border-radius: 8px;
+    color: var(--accent-orange);
+    font-size: 0.85rem;
+}
+
+/* Info Card */
+.info-card {
+    background-color: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--accent-cyan);
+    border-left: 4px solid var(--accent-cyan);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.info-header i {
+    color: var(--accent-cyan);
+    font-size: 1.2rem;
+}
+
+.info-header h6 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.info-card p {
+    color: var(--text-secondary);
+}
+
+/* Chat Button */
+.chat-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+    z-index: 900;
+    transition: all 0.3s;
+}
+
+.chat-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+}
+
+.chat-badge {
+    background-color: #dc3545;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .top-header {
+        padding: 0 15px;
+    }
+
+    .content-container {
+        padding: 20px 15px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .balance-amount {
+        font-size: 2rem;
+    }
+
+    .withdrawal-methods {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chat-button {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+
+    .withdrawal-methods {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .balance-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Permanent Side Tab -->
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+            <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon" title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html" class="tab-icon" title="Staking">
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sliding Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="staking.html" class="menu-item">
+                <i class="fas fa-coins"></i>
+                <span>Staking</span>
+            </a>
+            <a href="plan.html" class="menu-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Plan</span>
+            </a>
+            <a href="live-trading.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Live Trading</span>
+            </a>
+            <a href="deposit.html" class="menu-item">
+                <i class="fas fa-wallet"></i>
+                <span>Deposit</span>
+            </a>
+
+            <div class="menu-divider">MORE</div>
+
+            <a href="copy-trading.html" class="menu-item">
+                <i class="fas fa-copy"></i>
+                <span>Copy Traders</span>
+            </a>
+            <a href="transaction.html" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="withdraw.html" class="menu-item active">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdraw Funds</span>
+            </a>
+            <a href="kyc.html" class="menu-item">
+                <i class="fas fa-user-check"></i>
+                <span>KYC</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title"><img src="assets/img/logo.png" alt="StakeClone"></div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Withdraw Content -->
+        <div class="content-container">
+            <!-- Page Title -->
+            <h2 class="page-title mb-4">Withdraw Funds</h2>
+
+            <!-- Available Balance Card -->
+            <div class="custom-card mb-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="balance-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <div class="text-secondary small">Available for Withdrawal</div>
+                            <h2 class="balance-amount mb-0">$0.00</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdrawal Method Selection -->
+            <div class="custom-card mb-4">
+                <div class="section-header">
+                    <i class="fas fa-wallet text-warning"></i>
+                    <h5 class="mb-0 fw-bold">Withdrawal Method</h5>
+                </div>
+
+                <div class="method-label mb-3">Select Withdrawal Method</div>
+
+                <div class="withdrawal-methods">
+                    <button class="method-btn" data-method="bitcoin">
+                        <i class="fab fa-bitcoin"></i>
+                        <span>Bitcoin</span>
+                    </button>
+                    <button class="method-btn" data-method="paypal">
+                        <i class="fab fa-paypal"></i>
+                        <span>PayPal</span>
+                    </button>
+                    <button class="method-btn" data-method="bank">
+                        <i class="fas fa-university"></i>
+                        <span>Bank Transfer</span>
+                    </button>
+                    <button class="method-btn" data-method="usdt">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>USDT</span>
+                    </button>
+                    <button class="method-btn" data-method="cashapp">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Cash App</span>
+                    </button>
+                    <button class="method-btn" data-method="zelle">
+                        <i class="fas fa-z"></i>
+                        <span>Zelle</span>
+                    </button>
+                </div>
+
+                <!-- Bitcoin Form -->
+                <div class="method-form" id="bitcoin-form">
+                    <div class="form-header">
+                        <i class="fab fa-bitcoin"></i>
+                        <h6>Bitcoin Withdrawal</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bitcoin Address</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter your Bitcoin wallet address">
+                        <small class="form-text">Enter the Bitcoin address where you want to receive your funds</small>
+                    </div>
+                </div>
+
+                <!-- PayPal Form -->
+                <div class="method-form" id="paypal-form">
+                    <div class="form-header">
+                        <i class="fab fa-paypal"></i>
+                        <h6>PayPal Withdrawal</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PayPal Email</label>
+                        <input type="email" class="form-control custom-input" placeholder="Enter your PayPal email">
+                        <small class="form-text">Enter the email address associated with your PayPal account</small>
+                    </div>
+                </div>
+
+                <!-- Bank Transfer Form -->
+                <div class="method-form" id="bank-form">
+                    <div class="form-header">
+                        <i class="fas fa-university"></i>
+                        <h6>Bank Transfer</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bank Name</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter your bank name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Number</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter your account number">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Routing Number</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter routing number">
+                        <small class="form-text">For international transfers, please include SWIFT/BIC code</small>
+                    </div>
+                </div>
+
+                <!-- USDT Form -->
+                <div class="method-form" id="usdt-form">
+                    <div class="form-header">
+                        <i class="fas fa-dollar-sign"></i>
+                        <h6>USDT Withdrawal</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">USDT Address</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter your USDT wallet address">
+                        <small class="form-text">Enter the USDT address where you want to receive your funds</small>
+                    </div>
+                </div>
+
+                <!-- Cash App Form -->
+                <div class="method-form" id="cashapp-form">
+                    <div class="form-header">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h6>Cash App Withdrawal</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cash App Username</label>
+                        <input type="text" class="form-control custom-input" placeholder="Enter your $Cashtag">
+                        <small class="form-text">Enter your Cash App username including the $ symbol</small>
+                    </div>
+                </div>
+
+                <!-- Zelle Form -->
+                <div class="method-form" id="zelle-form">
+                    <div class="form-header">
+                        <i class="fas fa-z"></i>
+                        <h6>Zelle Withdrawal</h6>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Zelle Email</label>
+                        <input type="email" class="form-control custom-input" placeholder="Enter your Zelle email">
+                        <small class="form-text">Enter the email address associated with your Zelle account</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdrawal Details -->
+            <div class="custom-card" id="withdrawal-details">
+                <h6 class="details-header mb-3">Withdrawal Details</h6>
+
+                <div class="mb-3">
+                    <label class="form-label">Amount to Withdraw</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control custom-input" id="withdraw-amount" placeholder="Enter amount" min="100">
+                    </div>
+                    <small class="form-text">Minimum withdrawal: $100.00</small>
+                </div>
+
+                <div class="fee-summary">
+                    <div class="fee-row">
+                        <span class="text-secondary">Processing Fee</span>
+                        <span class="fw-bold" id="processing-fee">$0.00</span>
+                    </div>
+                    <div class="fee-row total-row">
+                        <span class="text-warning fw-bold">You Will Receive</span>
+                        <span class="text-warning fw-bold" id="final-amount">$0.00</span>
+                    </div>
+                </div>
+
+                <button class="btn-submit" id="submit-withdrawal">
+                    <i class="fas fa-check-circle"></i>
+                    Request Withdrawal
+                </button>
+
+                <div class="notice-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Withdrawals are typically processed within 24-48 hours</span>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="info-card mt-4">
+                <div class="info-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h6>Important Notice</h6>
+                </div>
+                <p class="mb-0">Please contact our customer support to complete your withdrawal.</p>
+            </div>
+
+            <!-- Chat Button -->
+            <div class="chat-button">
+                <i class="fas fa-comments"></i>
+                <span>Chat</span>
+                <div class="chat-badge">1</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Sidebar Function
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+}
+
+// Close Sidebar Function
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Close sidebar on menu item click (mobile)
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+});
+
+// Withdrawal Method Selection
+const methodBtns = document.querySelectorAll('.method-btn');
+const methodForms = document.querySelectorAll('.method-form');
+const withdrawalDetails = document.getElementById('withdrawal-details');
+let selectedMethod = null;
+
+methodBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const method = this.getAttribute('data-method');
+        
+        // Remove active class from all buttons
+        methodBtns.forEach(b => b.classList.remove('active'));
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Hide all forms
+        methodForms.forEach(form => form.classList.remove('active'));
+        
+        // Show selected form
+        const selectedForm = document.getElementById(`${method}-form`);
+        if (selectedForm) {
+            selectedForm.classList.add('active');
+        }
+        
+        // Show withdrawal details section
+        withdrawalDetails.classList.add('active');
+        
+        // Scroll to form
+        setTimeout(() => {
+            selectedForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+        
+        selectedMethod = method;
+    });
+});
+
+// Calculate withdrawal amount
+const withdrawAmountInput = document.getElementById('withdraw-amount');
+const processingFeeElem = document.getElementById('processing-fee');
+const finalAmountElem = document.getElementById('final-amount');
+
+function calculateWithdrawal() {
+    const amount = parseFloat(withdrawAmountInput.value) || 0;
+    
+    // Calculate 5% processing fee
+    const fee = amount * 0.05;
+    const finalAmount = amount - fee;
+    
+    processingFeeElem.textContent = `$${fee.toFixed(2)}`;
+    finalAmountElem.textContent = `$${finalAmount.toFixed(2)}`;
+}
+
+withdrawAmountInput.addEventListener('input', calculateWithdrawal);
+
+// Submit withdrawal
+const submitBtn = document.getElementById('submit-withdrawal');
+
+submitBtn.addEventListener('click', function() {
+    const amount = parseFloat(withdrawAmountInput.value) || 0;
+    
+    if (!selectedMethod) {
+        showAlert('Please select a withdrawal method', 'error');
+        return;
+    }
+    
+    if (amount < 100) {
+        showAlert('Minimum withdrawal amount is $100.00', 'error');
+        return;
+    }
+    
+    // Get form data based on selected method
+    const formData = getFormData(selectedMethod);
+    
+    if (!formData.isValid) {
+        showAlert(formData.message, 'error');
+        return;
+    }
+    
+    // Show success message
+    showAlert('Withdrawal request submitted successfully! Our team will process your request within 24-48 hours.', 'success');
+    
+    // Reset form after 2 seconds
+    setTimeout(() => {
+        resetForm();
+    }, 2000);
+});
+
+// Get form data based on method
+function getFormData(method) {
+    const form = document.getElementById(`${method}-form`);
+    const inputs = form.querySelectorAll('input');
+    
+    let isValid = true;
+    let message = '';
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            isValid = false;
+            message = 'Please fill in all required fields';
+        }
+    });
+    
+    return { isValid, message };
+}
+
+// Show alert function
+function showAlert(message, type) {
+    // Remove existing alerts
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `custom-alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.querySelector('.content-container').insertBefore(
+        alert, 
+        document.querySelector('.content-container').firstChild
+    );
+    
+    // Add styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .custom-alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .alert-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    
+    if (!document.querySelector('#alert-styles')) {
+        style.id = 'alert-styles';
+        document.head.appendChild(style);
+    }
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        alert.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => alert.remove(), 300);
+    }, 5000);
+}
+
+// Reset form
+function resetForm() {
+    // Reset method selection
+    methodBtns.forEach(btn => btn.classList.remove('active'));
+    methodForms.forEach(form => form.classList.remove('active'));
+    withdrawalDetails.classList.remove('active');
+    
+    // Reset inputs
+    document.querySelectorAll('.custom-input').forEach(input => {
+        input.value = '';
+    });
+    
+    withdrawAmountInput.value = '';
+    processingFeeElem.textContent = '$0.00';
+    finalAmountElem.textContent = '$0.00';
+    
+    selectedMethod = null;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Input validation
+document.querySelectorAll('.custom-input').forEach(input => {
+    input.addEventListener('blur', function() {
+        if (this.hasAttribute('required') && !this.value.trim()) {
+            this.style.borderColor = '#dc3545';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+    
+    input.addEventListener('focus', function() {
+        this.style.borderColor = 'var(--accent-cyan)';
+    });
+});
+
+// Format number inputs
+withdrawAmountInput.addEventListener('input', function() {
+    // Remove non-numeric characters except decimal point
+    this.value = this.value.replace(/[^0-9.]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = this.value.split('.');
+    if (parts.length > 2) {
+        this.value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limit to 2 decimal places
+    if (parts[1] && parts[1].length > 2) {
+        this.value = parseFloat(this.value).toFixed(2);
+    }
+});
+    </script>
+</body>
+</html>

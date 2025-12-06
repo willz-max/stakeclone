@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StakeClone - Identity Verification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #999999;
+    --accent-cyan: #00d9ff;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-orange: #ff8c42;
+    --accent-green: #10b981;
+    --accent-yellow: #fbbf24;
+    --border-color: #2a2a2a;
+    --sidebar-width: 50px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+/* Permanent Side Tab */
+.side-tab {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    z-index: 998;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-tab-header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hamburger-btn {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.hamburger-btn:hover {
+    color: var(--accent-cyan);
+}
+
+.side-tab-icons {
+    flex: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tab-icon {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+    font-size: 1.2rem;
+}
+
+.tab-icon:hover,
+.tab-icon.active {
+    color: var(--accent-cyan);
+    background-color: rgba(0, 217, 255, 0.05);
+    border-left-color: var(--accent-cyan);
+}
+
+/* Sliding Sidebar */
+.sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--bg-secondary);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.user-details h6 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.close-sidebar {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.close-sidebar:hover {
+    color: var(--text-primary);
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background-color: var(--bg-card);
+    color: var(--accent-cyan);
+    border-left-color: var(--accent-cyan);
+}
+
+.menu-item i {
+    width: 20px;
+    font-size: 18px;
+}
+
+.menu-divider {
+    padding: 10px 20px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Main Content */
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+.top-header {
+    height: 70px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-avatar-small {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.btn-logout:hover {
+    background-color: #bb2d3b;
+}
+
+/* Content Container */
+.content-container {
+    padding: 30px;
+}
+
+/* Page Header Section */
+.page-header-section {
+    margin-bottom: 2rem;
+}
+
+.header-icon-shield {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.page-main-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.status-label-text {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.status-badge-unverified {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+}
+
+.info-notice-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--accent-cyan);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.info-notice-box i {
+    color: var(--accent-cyan);
+    font-size: 1.1rem;
+}
+
+/* Submission Card */
+.submission-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.card-section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.warning-notice-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: rgba(251, 191, 36, 0.1);
+    border: 1px solid var(--accent-yellow);
+    border-left: 3px solid var(--accent-yellow);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.warning-notice-box i {
+    color: var(--accent-yellow);
+    font-size: 1.1rem;
+}
+
+/* Form Styles */
+.kyc-form-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 500;
+}
+
+.help-icon-tip {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: help;
+    margin-left: 5px;
+}
+
+.kyc-form-input,
+.kyc-form-select {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 6px;
+    width: 100%;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+.kyc-form-input:focus,
+.kyc-form-select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    background-color: var(--bg-primary);
+}
+
+.kyc-form-input::placeholder {
+    color: #555;
+}
+
+.kyc-form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 35px;
+}
+
+.kyc-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+}
+
+/* File Upload Section */
+.file-upload-section {
+    margin-top: 1.5rem;
+}
+
+.upload-field-box {
+    margin-bottom: 1rem;
+}
+
+.upload-field-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.file-drop-zone {
+    background-color: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.file-drop-zone:hover {
+    border-color: var(--accent-cyan);
+    background-color: rgba(0, 217, 255, 0.03);
+}
+
+.upload-zone-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.upload-zone-trigger i {
+    font-size: 1.8rem;
+    color: var(--accent-cyan);
+}
+
+.upload-zone-trigger:hover {
+    color: var(--accent-cyan);
+}
+
+.uploaded-file-info {
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(0, 217, 255, 0.1);
+    border-radius: 5px;
+    display: none;
+    color: var(--accent-cyan);
+    font-size: 0.85rem;
+}
+
+.uploaded-file-info.show {
+    display: block;
+}
+
+/* Submit Button */
+.kyc-submit-button {
+    padding: 12px 35px;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.kyc-submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Guidelines Info Card */
+.guidelines-info-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.guidelines-title-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.guidelines-title-section i {
+    color: var(--accent-cyan);
+    font-size: 1.3rem;
+}
+
+.guidelines-title-section h5 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.guideline-info-item {
+    display: flex;
+    gap: 12px;
+}
+
+.guideline-info-icon {
+    width: 45px;
+    height: 45px;
+    background-color: rgba(0, 217, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.guideline-info-icon i {
+    color: var(--accent-cyan);
+    font-size: 1.3rem;
+}
+
+.guideline-info-text h6 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.guideline-info-text p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.guidelines-footer-text {
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.guidelines-footer-text p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+/* Chat Button */
+.chat-button-fixed {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+    color: white;
+    padding: 12px 22px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    z-index: 900;
+    transition: all 0.3s;
+}
+
+.chat-button-fixed:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+}
+
+.chat-notification-badge {
+    background-color: #dc3545;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .top-header {
+        padding: 0 15px;
+    }
+
+    .content-container {
+        padding: 20px 15px;
+    }
+
+    .header-title {
+        font-size: 1.2rem;
+    }
+
+    .page-main-title {
+        font-size: 1.5rem;
+    }
+
+    .chat-button-fixed {
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+
+    .header-icon-shield {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+
+    .submission-card {
+        padding: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Permanent Side Tab -->
+    <div class="side-tab">
+        <div class="side-tab-header">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="side-tab-icons">
+            <a href="index.html" class="tab-icon" title="Overview">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="copy-trading.html" class="tab-icon" title="Copy Trading">
+                <i class="fas fa-briefcase"></i>
+            </a>
+            <a href="live-trading.html" class="tab-icon" title="Live Trading">
+                <i class="fas fa-chart-line"></i>
+            </a>
+            <a href="deposit.html" class="tab-icon" title="Deposit">
+                <i class="fas fa-wallet"></i>
+            </a>
+            <a href="staking.html" class="tab-icon" title="Staking">
+                <i class="fas fa-coins"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sliding Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h6>Willz</h6>
+                    <p>Willzogor@gmail.com</p>
+                </div>
+            </div>
+            <button class="close-sidebar" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </a>
+            <a href="staking.html" class="menu-item">
+                <i class="fas fa-coins"></i>
+                <span>Staking</span>
+            </a>
+            <a href="plan.html" class="menu-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Plan</span>
+            </a>
+            <a href="live-trading.html" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Live Trading</span>
+            </a>
+            <a href="deposit.html" class="menu-item">
+                <i class="fas fa-wallet"></i>
+                <span>Deposit</span>
+            </a>
+
+            <div class="menu-divider">MORE</div>
+
+            <a href="copy-trading.html" class="menu-item">
+                <i class="fas fa-copy"></i>
+                <span>Copy Traders</span>
+            </a>
+            <a href="transaction.html" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="withdraw.html" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdraw Funds</span>
+            </a>
+            <a href="kyc.html" class="menu-item active">
+                <i class="fas fa-user-check"></i>
+                <span>KYC</span>
+            </a>
+            <a href="profile.html" class="menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-title"><img src="assets/img/logo.png" alt=""></div>
+            <div class="user-actions">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-small">W</div>
+                    <span class="d-none d-sm-inline fw-semibold">Willz</span>
+                </div>
+                <button class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="d-none d-sm-inline ms-1">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- KYC Content -->
+        <div class="content-container">
+            <!-- Page Header -->
+            <div class="page-header-section mb-4">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="header-icon-shield">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h2 class="page-main-title mb-2">Identity Verification</h2>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="status-label-text">Current Status:</span>
+                            <span class="status-badge-unverified">Unverified</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-notice-box">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Please complete your verification by submitting the required documents below.</span>
+                </div>
+            </div>
+
+            <!-- Document Submission Card -->
+            <div class="submission-card mb-4">
+                <h5 class="card-section-title mb-3">Document Submission</h5>
+                
+                <div class="warning-notice-box mb-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span><strong>Note:</strong> Once submitted, you cannot reupload documents unless your submission is rejected.</span>
+                </div>
+
+                <form id="kycForm">
+                    <div class="row g-3">
+                        <!-- Country Issued -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">Country Issued</label>
+                            <select class="kyc-form-select" id="countryIssued" required>
+                                <option value="">-- Select Country --</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="CA">Canada</option>
+                                <option value="AU">Australia</option>
+                                <option value="NG">Nigeria</option>
+                                <option value="GH">Ghana</option>
+                                <option value="KE">Kenya</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="IN">India</option>
+                                <option value="PK">Pakistan</option>
+                                <option value="BD">Bangladesh</option>
+                                <option value="PH">Philippines</option>
+                            </select>
+                        </div>
+
+                        <!-- Document Type -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">Document Type</label>
+                            <select class="kyc-form-select" id="documentType" required>
+                                <option value="">-- Select Document --</option>
+                                <option value="passport">Passport</option>
+                                <option value="drivers_license">Driver's License</option>
+                                <option value="national_id">National ID Card</option>
+                                <option value="residence_permit">Residence Permit</option>
+                            </select>
+                        </div>
+
+                        <!-- Document Number -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">Document Number</label>
+                            <input type="text" class="kyc-form-input" id="documentNumber" placeholder="Enter document number" required>
+                        </div>
+
+                        <!-- SSN / ID Number -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">
+                                SSN / ID Number
+                                <i class="fas fa-question-circle help-icon-tip" title="Social Security Number or National ID Number"></i>
+                            </label>
+                            <input type="text" class="kyc-form-input" id="ssnNumber" placeholder="Enter SSN or ID number">
+                        </div>
+
+                        <!-- Issue Date -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">Issue Date</label>
+                            <input type="date" class="kyc-form-input kyc-date-input" id="issueDate" required>
+                        </div>
+
+                        <!-- Expiry Date -->
+                        <div class="col-md-6">
+                            <label class="kyc-form-label">Expiry Date</label>
+                            <input type="date" class="kyc-form-input kyc-date-input" id="expiryDate" required>
+                        </div>
+                    </div>
+
+                    <!-- File Uploads -->
+                    <div class="file-upload-section mt-4">
+                        <!-- ID Document Upload -->
+                        <div class="upload-field-box mb-3">
+                            <label class="upload-field-label">ID Document Upload</label>
+                            <div class="file-drop-zone" id="idUploadZone">
+                                <input type="file" id="idDocument" accept="image/*,.pdf" hidden>
+                                <label for="idDocument" class="upload-zone-trigger">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Select Document Image</span>
+                                </label>
+                                <div class="uploaded-file-info" id="idFileInfo"></div>
+                            </div>
+                        </div>
+
+                        <!-- Selfie Upload -->
+                        <div class="upload-field-box">
+                            <label class="upload-field-label">Selfie Photograph Upload</label>
+                            <div class="file-drop-zone" id="selfieUploadZone">
+                                <input type="file" id="selfieDocument" accept="image/*" hidden>
+                                <label for="selfieDocument" class="upload-zone-trigger">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Select Selfie Image</span>
+                                </label>
+                                <div class="uploaded-file-info" id="selfieFileInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="kyc-submit-button">
+                            <i class="fas fa-shield-alt"></i>
+                            Submit Verification
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Verification Guidelines -->
+            <div class="guidelines-info-card">
+                <div class="guidelines-title-section mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <h5>Verification Guidelines</h5>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="guideline-info-item">
+                            <div class="guideline-info-icon">
+                                <i class="fas fa-id-card"></i>
+                            </div>
+                            <div class="guideline-info-text">
+                                <h6>Valid ID Document</h6>
+                                <p>Government-issued, unexpired document with your photo and personal details.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="guideline-info-item">
+                            <div class="guideline-info-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="guideline-info-text">
+                                <h6>Clear Photos</h6>
+                                <p>All text must be legible and photos should be clear with good lighting.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="guideline-info-item">
+                            <div class="guideline-info-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="guideline-info-text">
+                                <h6>Secure Process</h6>
+                                <p>Your data is protected with encryption and stored securely.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="guideline-info-item">
+                            <div class="guideline-info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="guideline-info-text">
+                                <h6>Processing Time</h6>
+                                <p>Verification typically takes 24-48 hours to process.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guidelines-footer-text">
+                    <p>Your identity verification helps us prevent fraud and comply with global regulations. Documents should be valid, clearly visible, and match the information provided.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Sidebar Function
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+}
+
+// Close Sidebar Function
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+// Close sidebar on menu item click (mobile)
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+            closeSidebar();
+        }
+    });
+});
+
+// File Upload Handlers
+const idDocumentInput = document.getElementById('idDocument');
+const selfieDocumentInput = document.getElementById('selfieDocument');
+const idFileInfo = document.getElementById('idFileInfo');
+const selfieFileInfo = document.getElementById('selfieFileInfo');
+
+// Handle ID Document Upload
+idDocumentInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        displayFileInfo(file, idFileInfo);
+    }
+});
+
+// Handle Selfie Document Upload
+selfieDocumentInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        displayFileInfo(file, selfieFileInfo);
+    }
+});
+
+// Display File Information
+function displayFileInfo(file, infoElement) {
+    const fileName = file.name;
+    const fileSize = (file.size / 1024).toFixed(2); // Convert to KB
+    
+    infoElement.innerHTML = `
+        <i class="fas fa-file-alt"></i>
+        <strong>${fileName}</strong> (${fileSize} KB)
+    `;
+    infoElement.classList.add('show');
+}
+
+// Form Validation
+const kycForm = document.getElementById('kycForm');
+
+kycForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const countryIssued = document.getElementById('countryIssued').value;
+    const documentType = document.getElementById('documentType').value;
+    const documentNumber = document.getElementById('documentNumber').value;
+    const ssnNumber = document.getElementById('ssnNumber').value;
+    const issueDate = document.getElementById('issueDate').value;
+    const expiryDate = document.getElementById('expiryDate').value;
+    const idDocument = document.getElementById('idDocument').files[0];
+    const selfieDocument = document.getElementById('selfieDocument').files[0];
+    
+    // Validation
+    if (!countryIssued) {
+        showAlert('Please select a country', 'error');
+        return;
+    }
+    
+    if (!documentType) {
+        showAlert('Please select a document type', 'error');
+        return;
+    }
+    
+    if (!documentNumber.trim()) {
+        showAlert('Please enter your document number', 'error');
+        return;
+    }
+    
+    if (!issueDate) {
+        showAlert('Please select the issue date', 'error');
+        return;
+    }
+    
+    if (!expiryDate) {
+        showAlert('Please select the expiry date', 'error');
+        return;
+    }
+    
+    // Validate dates
+    const issueDateObj = new Date(issueDate);
+    const expiryDateObj = new Date(expiryDate);
+    const today = new Date();
+    
+    if (expiryDateObj <= issueDateObj) {
+        showAlert('Expiry date must be after issue date', 'error');
+        return;
+    }
+    
+    if (expiryDateObj < today) {
+        showAlert('Document has expired. Please use a valid document', 'error');
+        return;
+    }
+    
+    if (!idDocument) {
+        showAlert('Please upload your ID document', 'error');
+        return;
+    }
+    
+    if (!selfieDocument) {
+        showAlert('Please upload your selfie photograph', 'error');
+        return;
+    }
+    
+    // Validate file types
+    const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    const allowedDocTypes = [...allowedImageTypes, 'application/pdf'];
+    
+    if (!allowedDocTypes.includes(idDocument.type)) {
+        showAlert('ID document must be an image or PDF file', 'error');
+        return;
+    }
+    
+    if (!allowedImageTypes.includes(selfieDocument.type)) {
+        showAlert('Selfie must be an image file', 'error');
+        return;
+    }
+    
+    // Validate file sizes (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    
+    if (idDocument.size > maxSize) {
+        showAlert('ID document size must be less than 5MB', 'error');
+        return;
+    }
+    
+    if (selfieDocument.size > maxSize) {
+        showAlert('Selfie size must be less than 5MB', 'error');
+        return;
+    }
+    
+    // If all validation passes
+    submitVerification();
+});
+
+// Submit Verification
+function submitVerification() {
+    // Show loading state
+    const submitBtn = document.querySelector('.kyc-submit-button');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        // Show success message
+        showAlert('KYC verification submitted successfully! We will review your documents within 24-48 hours.', 'success');
+        
+        // Optional: Reset form after successful submission
+        // kycForm.reset();
+        // idFileInfo.classList.remove('show');
+        // selfieFileInfo.classList.remove('show');
+        
+    }, 2000);
+}
+
+// Show Alert Function
+function showAlert(message, type) {
+    // Remove existing alerts
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `custom-alert alert-${type}`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add styles if not already present
+    if (!document.querySelector('#alert-styles')) {
+        const style = document.createElement('style');
+        style.id = 'alert-styles';
+        style.textContent = `
+            .custom-alert {
+                position: fixed;
+                top: 90px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 25px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideDown 0.3s ease;
+                z-index: 1200;
+                min-width: 300px;
+                max-width: 500px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .alert-success {
+                background-color: #10b981;
+                color: white;
+            }
+            
+            .alert-error {
+                background-color: #dc3545;
+                color: white;
+            }
+            
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(alert);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        alert.style.animation = 'slideDown 0.3s ease reverse';
+        setTimeout(() => alert.remove(), 300);
+    }, 5000);
+}
+
+// Input validation and styling
+document.querySelectorAll('.kyc-form-input, .kyc-form-select').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.style.borderColor = 'var(--accent-cyan)';
+    });
+    
+    input.addEventListener('blur', function() {
+        if (this.hasAttribute('required') && !this.value.trim()) {
+            this.style.borderColor = '#dc3545';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+});
+
+// Document Number Validation (alphanumeric only)
+document.getElementById('documentNumber').addEventListener('input', function() {
+    // Allow alphanumeric and basic punctuation
+    this.value = this.value.replace(/[^a-zA-Z0-9\-\/]/g, '');
+});
+
+// SSN Number Validation (alphanumeric only)
+document.getElementById('ssnNumber').addEventListener('input', function() {
+    // Allow alphanumeric and hyphens
+    this.value = this.value.replace(/[^a-zA-Z0-9\-]/g, '');
+});
+
+// Date validation - Issue date cannot be in the future
+document.getElementById('issueDate').addEventListener('change', function() {
+    const selectedDate = new Date(this.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate > today) {
+        showAlert('Issue date cannot be in the future', 'error');
+        this.value = '';
+    }
+});
+
+// Date validation - Expiry date must be after issue date
+document.getElementById('expiryDate').addEventListener('change', function() {
+    const issueDate = document.getElementById('issueDate').value;
+    
+    if (issueDate) {
+        const issueDateObj = new Date(issueDate);
+        const expiryDateObj = new Date(this.value);
+        
+        if (expiryDateObj <= issueDateObj) {
+            showAlert('Expiry date must be after issue date', 'error');
+            this.value = '';
+        }
+    }
+});
+
+// Drag and Drop functionality for file uploads
+const fileDropZones = document.querySelectorAll('.file-drop-zone');
+
+fileDropZones.forEach(zone => {
+    zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'var(--accent-cyan)';
+        this.style.backgroundColor = 'rgba(0, 217, 255, 0.05)';
+    });
+    
+    zone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '';
+        this.style.backgroundColor = '';
+    });
+    
+    zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '';
+        this.style.backgroundColor = '';
+        
+        const file = e.dataTransfer.files[0];
+        const input = this.querySelector('input[type="file"]');
+        
+        if (file) {
+            // Create a new FileList with the dropped file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            input.files = dataTransfer.files;
+            
+            // Trigger change event
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+        }
+    });
+});
+
+// Help icon tooltip
+document.querySelectorAll('.help-icon-tip').forEach(icon => {
+    icon.addEventListener('click', function() {
+        const title = this.getAttribute('title');
+        showAlert(title, 'success');
+    });
+});
+    </script>
+</body>
+</html>
