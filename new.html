@@ -1,0 +1,659 @@
+<!-- recent deals -->
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <!-- title -->
+            <div class="col-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
+                <div class="section__title">
+                    <h2>Live Trading Activity</h2>
+                    <p>See a snapshot of real-time trades from top-performing traders. These trades are mirrored automatically for users who activate mirror trading mode.</p>
+                </div>
+            </div>
+            <!-- end title -->
+
+            <!-- deals table -->
+            <div class="col-12">
+                <div class="deals">
+                    <div class="deals__table-wrap">
+                        <table class="deals__table animated-table">
+                            <thead>
+                                <tr>
+                                    <th>Pair</th>
+                                    <th>Exchange</th>
+                                    <th>Date</th>
+                                    <th>Buy Price</th>
+                                    <th>Sell Price</th>
+                                    <th>Trade Volume</th>
+                                    <th>Profit</th>
+                                    <th>Spread</th>
+                                </tr>
+                            </thead>
+                            <tbody id="liveTradingTableBody">
+                                <!-- Table rows will be dynamically updated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Live trading indicator -->
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span class="live-text">Live Trading</span>
+                    </div>
+
+                    <!-- design elements -->
+                    <span class="screw screw--lines-bl"></span>
+                    <span class="screw screw--lines-br"></span>
+                    <span class="screw screw--lines-tr"></span>
+                    <span class="screw screw--lines-tl"></span>
+                </div>
+            </div>
+            <!-- end deals table -->
+
+            <div class="col-12">
+                <!-- section btns -->
+                <!--<div class="section__btns">-->
+                <!--    <a href="reports.html" class="section__btn">View Full Trade Reports</a>-->
+                <!--</div>-->
+                <!-- end section btns -->
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end recent deals -->
+
+<style>
+/* Make all table text white */
+.deals__table th,
+.deals__table td,
+.deals__table tr,
+.deals__table span:not(.badge) {
+    color: #ffffff !important;
+}
+
+/* Make sure profit/loss values remain colored appropriately */
+.deals__table td.green {
+    color: #4caf50 !important; /* Keep profit text green */
+}
+
+.deals__table td.red {
+    color: #f44336 !important; /* Keep loss text red */
+}
+
+/* Ensure badges remain readable */
+.badge.bg-primary, 
+.badge.bg-success {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+/* Add some subtle borders to improve readability in dark mode */
+.deals__table th, 
+.deals__table td {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Make table headers stand out slightly */
+.deals__table th {
+    font-weight: 600;
+    color: #ffffff !important;
+}
+
+/* Enhanced styling for the trading table */
+.deals {
+    position: relative;
+    background: rgba(20, 22, 42, 0.7);
+    border-radius: 12px;
+    padding: 25px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.deals:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(76, 175, 80, 0.03), rgba(60, 130, 246, 0.03));
+    z-index: -1;
+}
+
+.deals__table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+.deals__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.deals__table thead tr {
+    background: rgba(30, 32, 60, 0.8);
+}
+
+.deals__table th {
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(60, 130, 246, 0.3);
+}
+
+.deals__table td {
+    padding: 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.deals__table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.deals__table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+/* New row animation */
+@keyframes newRowHighlight {
+    0% { background-color: rgba(76, 175, 80, 0.3); }
+    100% { background-color: transparent; }
+}
+
+.new-row {
+    animation: newRowHighlight 2s ease-out;
+}
+
+/* Value change animation */
+@keyframes valueChange {
+    0% { color: rgba(76, 175, 80, 1) !important; }
+    100% { color: inherit; }
+}
+
+.value-change {
+    animation: valueChange 2s ease-out;
+}
+
+/* Badge styling */
+.badge {
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-primary {
+    background: linear-gradient(135deg, #3c82f6, #1a56db) !important;
+    box-shadow: 0 2px 5px rgba(60, 130, 246, 0.3);
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #4caf50, #2e7d32) !important;
+    box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+/* Live indicator */
+.live-indicator {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: rgba(20, 22, 42, 0.9);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 5;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #f44336;
+    animation: livePulse 1.5s infinite;
+}
+
+.live-text {
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@keyframes livePulse {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+/* Row flickering effect for updates */
+@keyframes rowFlicker {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(60, 130, 246, 0.15); }
+    100% { background-color: transparent; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .deals__table th,
+    .deals__table td {
+        padding: 12px 10px;
+    }
+    
+    .deals {
+        padding: 15px;
+    }
+    
+    .live-indicator {
+        top: 15px;
+        right: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .deals__table {
+        min-width: 900px; /* Ensure horizontal scrolling on mobile */
+    }
+}
+</style>
+
+<script>
+// Sample trade data
+const tradeData = [
+    {
+        pair: "BTC/USDT",
+        exchange: "Binance",
+        date: "20 Apr 2025",
+        buyPrice: "$83,241.56",
+        sellPrice: "$84,975.32",
+        volume: "2.35 BTC",
+        profit: "+$4,074.39",
+        isProfit: true,
+        spread: "2.08%",
+        isTopTrader: false,
+        isMirrored: false
+    },
+    {
+        pair: "ETH/USDT",
+        exchange: "Kraken",
+        date: "20 Apr 2025",
+        buyPrice: "$4,532.78",
+        sellPrice: "$4,689.45",
+        volume: "28.5 ETH",
+        profit: "+$4,471.06",
+        isProfit: true,
+        spread: "3.46%",
+        isTopTrader: true,
+        isMirrored: false
+    },
+    {
+        pair: "SOL/USDT",
+        exchange: "Coinbase",
+        date: "19 Apr 2025",
+        buyPrice: "$286.43",
+        sellPrice: "$298.75",
+        volume: "354 SOL",
+        profit: "+$4,355.52",
+        isProfit: true,
+        spread: "4.30%",
+        isTopTrader: false,
+        isMirrored: false
+    },
+    {
+        pair: "XRP/USDT",
+        exchange: "Bybit",
+        date: "19 Apr 2025",
+        buyPrice: "$1.35",
+        sellPrice: "$1.32",
+        volume: "15,500 XRP",
+        profit: "-$465.00",
+        isProfit: false,
+        spread: "-2.22%",
+        isTopTrader: false,
+        isMirrored: false
+    },
+    {
+        pair: "DOGE/USDT",
+        exchange: "OKX",
+        date: "18 Apr 2025",
+        buyPrice: "$0.254",
+        sellPrice: "$0.287",
+        volume: "125,000 DOGE",
+        profit: "+$4,125.00",
+        isProfit: true,
+        spread: "12.99%",
+        isTopTrader: true,
+        isMirrored: false
+    },
+    {
+        pair: "ADA/USDT",
+        exchange: "Binance",
+        date: "18 Apr 2025",
+        buyPrice: "$0.978",
+        sellPrice: "$1.051",
+        volume: "18,200 ADA",
+        profit: "+$1,328.60",
+        isProfit: true,
+        spread: "7.46%",
+        isTopTrader: false,
+        isMirrored: false
+    },
+    {
+        pair: "AVAX/USDT",
+        exchange: "KuCoin",
+        date: "17 Apr 2025",
+        buyPrice: "$67.32",
+        sellPrice: "$72.85",
+        volume: "420 AVAX",
+        profit: "+$2,322.60",
+        isProfit: true,
+        spread: "8.21%",
+        isTopTrader: false,
+        isMirrored: true
+    },
+    {
+        pair: "DOT/USDT",
+        exchange: "Binance",
+        date: "17 Apr 2025",
+        buyPrice: "$12.45",
+        sellPrice: "$13.18",
+        volume: "1,250 DOT",
+        profit: "+$912.50",
+        isProfit: true,
+        spread: "5.86%",
+        isTopTrader: false,
+        isMirrored: false
+    },
+    {
+        pair: "LINK/USDT",
+        exchange: "Coinbase",
+        date: "16 Apr 2025",
+        buyPrice: "$18.23",
+        sellPrice: "$19.47",
+        volume: "980 LINK",
+        profit: "+$1,215.20",
+        isProfit: true,
+        spread: "6.80%",
+        isTopTrader: false,
+        isMirrored: true
+    },
+    {
+        pair: "MATIC/USDT",
+        exchange: "Kraken",
+        date: "16 Apr 2025",
+        buyPrice: "$0.875",
+        sellPrice: "$0.854",
+        volume: "12,500 MATIC",
+        profit: "-$262.50",
+        isProfit: false,
+        spread: "-2.40%",
+        isTopTrader: false,
+        isMirrored: false
+    }
+];
+
+// Additional trading pairs for variety
+const additionalPairs = [
+    "BNB/USDT", "SHIB/USDT", "UNI/USDT", "ATOM/USDT", "AAVE/USDT", 
+    "FTM/USDT", "NEAR/USDT", "BCH/USDT", "LTC/USDT", "APE/USDT"
+];
+
+// Exchanges for variety
+const exchanges = ["Binance", "Kraken", "Coinbase", "OKX", "KuCoin", "Bybit", "Bitfinex", "Gemini"];
+
+// Function to generate a random trade
+function generateRandomTrade() {
+    // Get random pair or use additional pair
+    const useAdditionalPair = Math.random() > 0.7;
+    let pair;
+    
+    if (useAdditionalPair) {
+        const randomIndex = Math.floor(Math.random() * additionalPairs.length);
+        pair = additionalPairs[randomIndex];
+    } else {
+        // Extract just the base currency from existing pairs
+        const existingPairs = tradeData.map(trade => trade.pair.split('/')[0]);
+        const randomIndex = Math.floor(Math.random() * existingPairs.length);
+        pair = existingPairs[randomIndex] + "/USDT";
+    }
+    
+    // Random exchange
+    const exchange = exchanges[Math.floor(Math.random() * exchanges.length)];
+    
+    // Generate random price data
+    const isProfit = Math.random() > 0.3; // 70% chance of profit
+    
+    // Base price between $0.01 and $100,000
+    let buyPrice;
+    if (pair.includes("BTC")) {
+        buyPrice = (Math.random() * 30000 + 70000).toFixed(2);
+    } else if (pair.includes("ETH")) {
+        buyPrice = (Math.random() * 2000 + 3000).toFixed(2);
+    } else if (pair.includes("SOL")) {
+        buyPrice = (Math.random() * 100 + 200).toFixed(2);
+    } else if (pair.includes("DOGE") || pair.includes("SHIB")) {
+        buyPrice = (Math.random() * 0.5).toFixed(4);
+    } else {
+        buyPrice = (Math.random() * 200 + 0.5).toFixed(pair.includes("ADA") || pair.includes("XRP") ? 3 : 2);
+    }
+    
+    // Calculate spread between -5% and +15%
+    const spreadPercent = isProfit ? 
+                         (Math.random() * 15 + 1).toFixed(2) : 
+                         (-(Math.random() * 5)).toFixed(2);
+    
+    // Calculate sell price based on spread
+    const sellPrice = (parseFloat(buyPrice) * (1 + parseFloat(spreadPercent) / 100)).toFixed(buyPrice.split('.')[1].length);
+    
+    // Generate volume
+    let volume;
+    if (pair.includes("BTC")) {
+        volume = (Math.random() * 3 + 0.5).toFixed(2);
+    } else if (pair.includes("ETH")) {
+        volume = (Math.random() * 30 + 5).toFixed(1);
+    } else if (pair.includes("DOGE") || pair.includes("SHIB")) {
+        volume = Math.floor(Math.random() * 900000 + 100000).toLocaleString();
+    } else {
+        volume = Math.floor(Math.random() * 9000 + 100).toLocaleString();
+    }
+    
+    // Calculate profit/loss
+    const priceDiff = parseFloat(sellPrice) - parseFloat(buyPrice);
+    const volNumber = parseFloat(volume.replace(/,/g, ''));
+    const profitAmount = priceDiff * volNumber;
+    
+    // Format profit with + or - sign
+    const profit = (profitAmount >= 0 ? "+" : "") + "$" + Math.abs(profitAmount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    // Random attributes
+    const isTopTrader = Math.random() > 0.85; // 15% chance of being top trader
+    const isMirrored = Math.random() > 0.85; // 15% chance of being mirrored
+    
+    // Generate date (within last 5 days)
+    const today = new Date();
+    const daysAgo = Math.floor(Math.random() * 5);
+    today.setDate(today.getDate() - daysAgo);
+    const date = today.getDate() + " Apr 2025";
+    
+    return {
+        pair: pair,
+        exchange: exchange,
+        date: date,
+        buyPrice: "$" + parseFloat(buyPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4}),
+        sellPrice: "$" + parseFloat(sellPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4}),
+        volume: volume + " " + pair.split('/')[0],
+        profit: profit,
+        isProfit: profitAmount >= 0,
+        spread: spreadPercent + "%",
+        isTopTrader: isTopTrader,
+        isMirrored: isMirrored
+    };
+}
+
+// Function to create table row HTML
+function createTableRow(trade) {
+    let pairCell = trade.pair;
+    
+    if (trade.isTopTrader) {
+        pairCell = `<span class="badge bg-primary">Top Trader</span> ${trade.pair}`;
+    } else if (trade.isMirrored) {
+        pairCell = `<span class="badge bg-success">Mirrored</span> ${trade.pair}`;
+    }
+    
+    return `
+        <tr>
+            <td>${pairCell}</td>
+            <td>${trade.exchange}</td>
+            <td>${trade.date}</td>
+            <td>${trade.buyPrice}</td>
+            <td>${trade.sellPrice}</td>
+            <td>${trade.volume}</td>
+            <td class="${trade.isProfit ? 'green' : 'red'}">${trade.profit}</td>
+            <td>${trade.spread}</td>
+        </tr>
+    `;
+}
+
+// Function to initialize the table
+function initializeTradingTable() {
+    const tableBody = document.getElementById('liveTradingTableBody');
+    
+    // Clear the table
+    tableBody.innerHTML = '';
+    
+    // Add rows from sample data (limited to 7 rows)
+    for (let i = 0; i < 7; i++) {
+        tableBody.innerHTML += createTableRow(tradeData[i]);
+    }
+}
+
+// Function to update a random cell in the table
+function updateRandomCell() {
+    const tableBody = document.getElementById('liveTradingTableBody');
+    const rows = tableBody.querySelectorAll('tr');
+    
+    // Select a random row
+    const randomRowIndex = Math.floor(Math.random() * rows.length);
+    const randomRow = rows[randomRowIndex];
+    
+    // Select a random cell (excluding the first one which has the pair name)
+    const cells = randomRow.querySelectorAll('td');
+    const randomCellIndex = Math.floor(Math.random() * (cells.length - 1)) + 1;
+    const randomCell = cells[randomCellIndex];
+    
+    // Store original class
+    const originalClass = randomCell.className;
+    
+    // Apply animation class
+    randomCell.classList.add('value-change');
+    
+    // Update with new data
+    if (randomCellIndex === 3) { // Buy price
+        const newPrice = "$" + (parseFloat(cells[3].textContent.replace(/[^0-9.]/g, '')) * (1 + (Math.random() * 0.02 - 0.01))).toFixed(2);
+        randomCell.textContent = newPrice;
+    } else if (randomCellIndex === 4) { // Sell price
+        const newPrice = "$" + (parseFloat(cells[4].textContent.replace(/[^0-9.]/g, '')) * (1 + (Math.random() * 0.02 - 0.01))).toFixed(2);
+        randomCell.textContent = newPrice;
+    } else if (randomCellIndex === 6) { // Profit
+        const currentProfit = parseFloat(cells[6].textContent.replace(/[^0-9.]/g, ''));
+        const isProfit = cells[6].textContent.includes('+');
+        const newProfit = currentProfit * (1 + (Math.random() * 0.1 - 0.05));
+        
+        // Format new profit
+        const newProfitText = (newProfit >= 0 ? "+" : "-") + "$" + newProfit.toFixed(2);
+        randomCell.textContent = newProfitText;
+        
+        // Update class if profit direction changed
+        if ((newProfit >= 0) !== isProfit) {
+            randomCell.className = newProfit >= 0 ? 'green' : 'red';
+        } else {
+            randomCell.className = originalClass;
+        }
+    } else if (randomCellIndex === 7) { // Spread
+        const currentSpread = parseFloat(cells[7].textContent);
+        const newSpread = (currentSpread + (Math.random() * 0.2 - 0.1)).toFixed(2) + "%";
+        randomCell.textContent = newSpread;
+    }
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        randomCell.classList.remove('value-change');
+    }, 2000);
+}
+
+// Function to add a new row
+function addNewTrade() {
+    const tableBody = document.getElementById('liveTradingTableBody');
+    const rows = tableBody.querySelectorAll('tr');
+    
+    // Generate a new random trade
+    const newTrade = generateRandomTrade();
+    
+    // Create a new row element
+    const newRow = document.createElement('tr');
+    newRow.classList.add('new-row');
+    newRow.innerHTML = createTableRow(newTrade).trim();
+    
+    // Add to the top of the table
+    if (rows.length > 0) {
+        tableBody.insertBefore(newRow, rows[0]);
+    } else {
+        tableBody.appendChild(newRow);
+    }
+    
+    // Remove the last row if we have more than 7
+    if (rows.length >= 7) {
+        tableBody.removeChild(rows[rows.length - 1]);
+    }
+    
+    // Remove animation class after it completes
+    setTimeout(() => {
+        newRow.classList.remove('new-row');
+    }, 2000);
+}
+
+// Initialize the table when the document is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTradingTable();
+    
+    // Start updating random cells every 2-4 seconds
+    setInterval(() => {
+        updateRandomCell();
+    }, Math.random() * 2000 + 2000);
+    
+    // Add new trades every 8-15 seconds
+    setInterval(() => {
+        addNewTrade();
+    }, Math.random() * 7000 + 8000);
+});
+
+// Add flickering effect to rows occasionally
+setInterval(() => {
+    const tableBody = document.getElementById('liveTradingTableBody');
+    if (!tableBody) return;
+    
+    const rows = tableBody.querySelectorAll('tr');
+    if (rows.length === 0) return;
+    
+    // Select a random row
+    const randomRowIndex = Math.floor(Math.random() * rows.length);
+    const randomRow = rows[randomRowIndex];
+    
+    // Add and remove animation style
+    randomRow.style.animation = 'rowFlicker 0.8s';
+    
+    setTimeout(() => {
+        randomRow.style.animation = '';
+    }, 800);
+}, 5000);
+</script>	
